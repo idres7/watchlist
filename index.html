@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>قائمتي</title><meta name="theme-color" content="#0e0f12">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0e0f12;--s1:#17181d;--s2:#1f2127;--ln:#2a2c34;--tx:#f2f1ee;--mu:#8b8d96;--ac:#7c9cff;--gold:#f5b942;--ok:#4cc38a;--r:14px}
@@ -72,6 +72,7 @@ html,body{overflow-x:clip}#app{width:100%;overflow-x:clip}
 .hdl{touch-action:none;font-size:20px;color:var(--mu);padding:2px 8px}.rw.drag{outline:1px solid var(--ac)}.sheet .grid{padding:12px 0}
 .cover{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:10px;border:1px dashed var(--ln);border-radius:12px;color:var(--mu);text-align:right}.cover img{width:44px;height:64px;object-fit:cover;border-radius:6px}
 .gp{position:absolute;bottom:0;inset-inline-start:0;height:4px;background:var(--ok)}.gr{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--ln)}
+.lk{color:#4da3ff;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 </style></head><body>
 <div id="app"></div>
 <nav id="nav"></nav><div class="veil" id="veil"></div><div class="sheet" id="sheet"></div><div class="toast" id="toast"></div>
@@ -99,7 +100,7 @@ function sec(t,list,go){if(!list.length)return"";return`<div class="sec"><div cl
 function home(){const w=items.filter(i=>i.status==="watched").length,g=items.filter(i=>i.status==="watching").length,t=items.length;
  const up=items.filter(i=>i.status==="unwatched"&&i.imdb>=8).sort((a,b)=>b.imdb-a.imdb).slice(0,14);
  const nw=[...items].sort((a,b)=>b.addedAt-a.addedAt).slice(0,14);
- $("#app").innerHTML=`<h1>قائمتي</h1><div class="sub">${t} عمل في مكتبتك</div><div class="stats"><div class="nums"><div><b>${w}</b><span>شاهدت</span></div><div><b>${g}</b><span>جاري</span></div><div><b>${t-w-g}</b><span>بالانتظار</span></div></div><div class="bar"><i style="width:${Math.round(w/t*100)}%"></i></div></div><div style="padding:14px 18px 0"><button class="btn" data-act="rnd" style="margin:0">🎲 اختر لي شي أشاهده</button></div>`+sec("أكمل المشاهدة",items.filter(i=>i.status==="watching"),"watching")+sec("الأعلى تقييماً بانتظارك",up,"unwatched")+sec("أُضيف مؤخراً",nw)}
+ $("#app").innerHTML=`<h1>قائمتي</h1><div class="sub">${t} عمل في مكتبتك</div><div class="stats"><div class="nums"><div><b>${w}</b><span>شاهدت</span></div><div><b>${g}</b><span>جاري</span></div><div><b>${t-w-g}</b><span>بالانتظار</span></div></div><div class="bar"><i style="width:${Math.round(w/t*100)}%"></i></div></div><div style="padding:14px 18px 0"><button class="btn" data-act="rnd" style="margin:0">🎲 اختر لي شي أشاهده</button></div>`+sec("أكمل المشاهدة",items.filter(i=>i.status==="watching"),"watching")+upSec()+sec("الأعلى تقييماً بانتظارك",up,"unwatched")+sec("أُضيف مؤخراً",nw)}
 function lib(){$("#app").innerHTML=`<div class="top"><h1>المكتبة</h1><input class="search" id="q" placeholder="ابحث بالاسم" value="${E(S.q)}"><div class="tabs">${[["all","الكل"],...TYPES].map(([k,l])=>`<button class="chip ${S.type===k?"on":""}" data-type="${k}">${l}</button>`).join("")}<button class="chip ${GM?"on":""}" data-x="grp">تجميع</button>${S.sort==="custom"?'<button class="chip" data-x="reord">ترتيب</button>':""}</div><div class="tools"><div class="seg">${[["all","الكل"],["unwatched","لم أشاهد"],["watching","جاري"],["watched","شاهدت"]].map(([k,l])=>`<button class="${S.st===k?"on":""}" data-s="${k}">${l}</button>`).join("")}</div><select id="so">${[["new","الأحدث"],["imdb","التقييم"],["year","السنة"],["name","الاسم"],["custom","مخصص"]].map(([k,l])=>`<option value="${k}" ${S.sort===k?"selected":""}>${l}</option>`).join("")}</select></div></div><div id="res"></div>`;fill()}
 function filt(){const q=S.q.trim().toLowerCase();return items.filter(i=>(S.type==="all"||i.type===S.type)&&(S.st==="all"||i.status===S.st)&&(!q||i.name.toLowerCase().includes(q)))}
 function fill(){let l=filt();if(S.sort==="custom"){const p=new Map(fullOrd().map((i,k)=>[i.id,k]));l.sort((a,b)=>p.get(a.id)-p.get(b.id))}
@@ -108,10 +109,10 @@ function fill(){let l=filt();if(S.sort==="custom"){const p=new Map(fullOrd().map
  $("#res").innerHTML=u.length?`<div class="count">${u.length} نتيجة</div><div class="grid">${u.slice(0,S.lim).map(x=>x.members?gcard(x):card(x)).join("")}</div>${u.length>S.lim?'<button class="more" data-act="more">عرض المزيد</button>':""}`:'<div class="empty">ما كو نتائج بهالفلتر</div>'}
 function render(){nav();({home,lib,more,series})[S.tab]();scrollTo(0,0)}
 function sheet(h){$("#sheet").innerHTML=`<div class="grab"></div>`+h;$("#sheet").classList.add("on");$("#veil").classList.add("on")}
-function close(){$("#sheet").classList.remove("on");$("#veil").classList.remove("on")}
+function close(){GBACK=null;$("#sheet").classList.remove("on");$("#veil").classList.remove("on")}
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1600)}
 function detail(id){const i=items.find(x=>x.id==id);if(!i)return;
- sheet(`<div class="dh"><div class="poster">${i.image?`<img src="${E(i.image)}" alt="">`:E(i.name)}</div><div><h2>${E(i.name)}</h2><p>${[i.year,TL[i.type],flag(i.country)].filter(Boolean).join(" • ")}</p>${i.imdb?`<p style="color:var(--gold)">★ ${i.imdb} IMDb</p>`:""}</div></div>
+ sheet((GBACK?`<button class="chip" data-x="g_back" style="margin-bottom:10px;background:var(--s2);color:var(--tx)">↩ رجوع للدليل</button>`:"")+`<div class="dh"><div class="poster">${i.image?`<img src="${E(i.image)}" alt="">`:E(i.name)}</div><div><h2>${E(i.name)}</h2><p>${[i.year,TL[i.type],flag(i.country)].filter(Boolean).join(" • ")}</p>${i.imdb?`<p style="color:var(--gold)">★ ${i.imdb} IMDb</p>`:""}</div></div>
  <div class="tabs" style="margin-top:14px;flex-wrap:wrap"><button class="chip" data-x="e_edit" data-k="${i.id}">✏️ تعديل</button><button class="chip" data-x="e_fetch" data-k="${i.id}">🔍 جلب تلقائي</button><button class="chip" data-x="e_pick" data-k="${i.id}">🖼️ تغيير الغلاف</button><button class="chip" data-x="e_tm" data-k="${i.id}">ℹ️ تفاصيل</button><button class="chip" data-x="e_fr" data-k="${i.id}">🔗 السلسلة</button></div><div class="lbl">الحالة</div><div class="seg">${Object.keys(ST).map(k=>`<button class="${i.status===k?"on":""}" data-set="${k}" data-id="${i.id}">${ST[k]}</button>`).join("")}</div>
  <div class="lbl">تقييمي</div><div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=i.myRating?"on":""}" data-star="${n}" data-id="${i.id}">★</button>`).join("")}</div>
  <div class="lbl">ملاحظة</div><textarea id="note" data-id="${i.id}" placeholder="اكتب ملاحظتك">${E(i.note)}</textarea>
@@ -120,7 +121,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("button,.veil");i
  if(t.id==="veil")return close();
  if(d.go){S.tab=d.go;if(d.st)S.st=d.st,S.type="all",S.q="";render()}
  else if(d.type){S.type=d.type;S.lim=60;lib()}else if(d.s){S.st=d.s;S.lim=60;lib()}
- else if(d.set){const i=items.find(x=>x.id==d.id);i.status=d.set;save();detail(i.id);S.tab==="home"?home():fill()}
+ else if(d.set){const i=items.find(x=>x.id==d.id);i.status=d.set;if(d.set==="watched"&&!i.watchedAt)i.watchedAt=Date.now();save();detail(i.id);S.tab==="home"?home():fill()}
  else if(d.star){const i=items.find(x=>x.id==d.id);i.myRating=i.myRating==d.star?0:+d.star;save();detail(i.id)}
  else if(d.del){if(confirm("نقل إلى سلة المحذوفات؟")){toTrash(d.del);close();render();toast("نُقل للسلة")}}
  else if(d.act==="more"){S.lim+=60;fill()}
@@ -163,29 +164,24 @@ const dOpts=q=>{q=q.toLowerCase();$("#d_i").innerHTML=items.filter(i=>!q||i.name
 function diaryForm(){sheet(`<h2>تسجيل مشاهدة</h2><div class="lbl">العمل</div><input class="in" id="d_q" placeholder="ابحث بالاسم"><select class="in" id="d_i" size="4" style="margin-top:8px"></select><div class="two"><div><div class="lbl">الموسم</div><input class="in" id="d_s" type="number" inputmode="numeric"></div><div><div class="lbl">الحلقة</div><input class="in" id="d_e" type="number" inputmode="numeric"></div></div><div class="lbl">التاريخ</div><input class="in" id="d_d" type="date" value="${new Date().toISOString().slice(0,10)}"><div class="lbl">التقييم</div><select class="in" id="d_r">${[0,1,2,3,4,5].map(n=>`<option value="${n}">${n?"★".repeat(n):"بدون"}</option>`).join("")}</select><div class="lbl">رأيي</div><textarea id="d_v"></textarea><button class="btn" data-x="d_save">حفظ</button>`);dOpts("")}
 /* guides */
 function guidesSheet(){sheet(`<h2>الأدلة</h2><button class="btn" data-x="g_new" style="margin-top:10px">دليل جديد</button>`+(GUIDES.length?[...GUIDES].sort((a,b)=>!!b.pinned-!!a.pinned).map(g=>`<button class="li" data-x="g_view" data-k="${g.id}" style="width:100%;text-align:right"><span>${g.pinned?"📌 ":""}${g.icon} ${E(g.title)}</span></button>`).join(""):'<div class="empty">ما كو أدلة بعد</div>'))}
-function guideView(id){const g=GUIDES.find(x=>x.id==id);sheet(`<h2>${g.icon} ${E(g.title)}</h2><div style="white-space:pre-wrap;line-height:1.8;margin-top:12px;font-size:14px">${E(g.body)}</div><div class="two"><button class="btn" data-x="g_pin" data-k="${id}" style="background:var(--s2);color:var(--tx)">${g.pinned?"إلغاء التثبيت":"تثبيت"}</button><button class="btn" data-x="g_edit" data-k="${id}">تعديل</button></div><button class="del" data-x="g_del" data-k="${id}">حذف الدليل</button>`)}
+function guideView(id){const g=GUIDES.find(x=>x.id==id);GCUR=id;sheet(`<h2>${g.icon} ${E(g.title)}</h2><div style="white-space:pre-wrap;line-height:1.8;margin-top:12px;font-size:14px">${linkify(g.body)}</div><div class="two"><button class="btn" data-x="g_pin" data-k="${id}" style="background:var(--s2);color:var(--tx)">${g.pinned?"إلغاء التثبيت":"تثبيت"}</button><button class="btn" data-x="g_edit" data-k="${id}">تعديل</button></div><button class="del" data-x="g_del" data-k="${id}">حذف الدليل</button>`)}
 function guideForm(id){const g=GUIDES.find(x=>x.id==id)||{title:"",body:"",icon:GI[0]};sheet(`<h2>${id?"تعديل الدليل":"دليل جديد"}</h2><div class="lbl">العنوان</div><input class="in" id="g_t" value="${E(g.title)}"><div class="lbl">الأيقونة</div><select class="in" id="g_i">${GI.map(x=>`<option ${x===g.icon?"selected":""}>${x}</option>`).join("")}</select><div class="lbl">المحتوى</div><textarea id="g_b" style="min-height:140px">${E(g.body)}</textarea><button class="btn" data-x="g_save" data-k="${id||""}">حفظ</button>`)}
-/* cloud */
-const CK="$2a$10$iqmdz6CGhvZTGdLJJ7u4LOq1oxFNo0zG6SISSyw8jafzQLShIuNUy";let CBIN=localStorage.getItem("wl_cloud_bin"),CERR="",CBUSY=false;var _ct;
-function scheduleCloudPush(){clearTimeout(_ct);if(localStorage.getItem("wl_cloud_bin"))_ct=setTimeout(()=>cloudPush(true),2500)}
-function cloudSheet(){const t=+localStorage.getItem("wl_cloud_last");sheet(`<h2>المزامنة السحابية</h2><p class="sub" style="padding:8px 0">${t?"آخر مزامنة: "+new Date(t).toLocaleString("ar-IQ"):"ما انرفعت نسخة بعد"}</p>${CERR?`<p style="color:#ff7a7a;font-size:13px">${E(CERR)}</p>`:""}<div class="two"><button class="btn" data-x="c_push">رفع الآن</button><button class="btn" data-x="c_pull" style="background:var(--s2);color:var(--tx)">استرجاع</button></div>`)}
-async function cloudPush(silent){if(CBUSY)return;CBUSY=true;try{if(typeof LZString==="undefined")throw new Error("مكتبة الضغط ما تحملت، تأكد من الإنترنت");
- const lite=items.map(i=>(i.image||"").startsWith("data:")?{...i,image:""}:i);
- const body=JSON.stringify({c:1,data:LZString.compressToBase64(JSON.stringify({items:lite,diary:DIARY,customCountries:COUNTRIES.filter(c=>c.code.startsWith("c_")),guides:GUIDES,order:ORDER,syncedAt:Date.now()}))});
- if(body.length>95000)throw new Error("البيانات كبيرة ("+Math.round(body.length/1024)+"KB)");
- const h={"Content-Type":"application/json","X-Master-Key":CK};
- if(!CBIN){const r=await fetch("https://api.jsonbin.io/v3/b",{method:"POST",headers:{...h,"X-Bin-Name":"watchlist-dark"},body});if(!r.ok)throw new Error("("+r.status+")");CBIN=(await r.json()).metadata.id;localStorage.setItem("wl_cloud_bin",CBIN)}
- else{const r=await fetch("https://api.jsonbin.io/v3/b/"+CBIN,{method:"PUT",headers:h,body});if(!r.ok)throw new Error("("+r.status+")")}
- localStorage.setItem("wl_cloud_last",Date.now());CERR="";if(!silent){toast("تم الرفع للسحابة");cloudSheet()}
-}catch(e){CERR=e.message||String(e);if(!silent){toast("فشل الرفع");cloudSheet()}}CBUSY=false}
-async function cloudPull(){if(!CBIN)return toast("ما كو نسخة سحابية");CBUSY=true;toast("جاري الاسترجاع...");try{const r=await fetch("https://api.jsonbin.io/v3/b/"+CBIN+"/latest",{headers:{"X-Master-Key":CK}});if(!r.ok)throw new Error("("+r.status+")");let rec=(await r.json()).record;
- if(rec&&rec.c===1&&rec.data){const j=LZString.decompressFromBase64(rec.data);if(!j)throw new Error("فشل فك الضغط");rec=JSON.parse(j)}
- if(rec.items){items=rec.items;save()}if(rec.diary){DIARY=rec.diary;put("wl_diary_v1",DIARY)}if(rec.guides){GUIDES=rec.guides;put("wl_guides_v1",GUIDES)}if(rec.order){ORDER=rec.order;put("wl_order",ORDER)}
+/* cloud (server) */
+const srv=()=>{const s=LS("wl_srv",null);return s&&s.url&&s.token?s:null};
+let CERR="",CBUSY=false;var _ct;
+const srvFetch=(p,o={})=>{const s=srv();if(!s)throw new Error("فعّل السيرفر أول من المزيد");return fetch(s.url+p,{...o,headers:{...(o.headers||{}),"X-Token":s.token}})};
+function scheduleCloudPush(){clearTimeout(_ct);if(localStorage.getItem("wl_srv")&&localStorage.getItem("wl_srv_on"))_ct=setTimeout(()=>cloudPush(true),5000)}
+const snapshot=()=>JSON.stringify({v:2,items,diary:DIARY,guides:GUIDES,order:ORDER,customCountries:COUNTRIES.filter(c=>c.code.startsWith("c_")),syncedAt:Date.now()});
+function srvSheet(){const s=LS("wl_srv",null)||{},t=+localStorage.getItem("wl_cloud_last");sheet(`<h2>السيرفر والمزامنة</h2><div class="lbl">رابط السيرفر</div><input class="in" id="sv_u" dir="ltr" value="${E(s.url||"https://watchlist.com-mob222.workers.dev")}"><div class="lbl">كلمة السر (TOKEN)</div><input class="in" id="sv_t" type="password" dir="ltr" autocomplete="off" value="${E(s.token||"")}"><button class="btn" data-x="sv_save">حفظ واختبار الاتصال</button><p class="sub" style="padding:14px 0 4px">${t?"آخر مزامنة: "+new Date(t).toLocaleString("ar-IQ"):"ما انرفعت نسخة بعد"}</p>${CERR?`<p style="color:#ff7a7a;font-size:13px">${E(CERR)}</p>`:""}<div class="two"><button class="btn" data-x="c_push">رفع الآن</button><button class="btn" data-x="c_pull" style="background:var(--s2);color:var(--tx)">استرجاع</button></div><p class="sub" style="padding:12px 0 0;font-size:12px;line-height:1.7">بعد أول رفع أو استرجاع، التطبيق يرفع تغييراتك تلقائياً.</p>`)}
+async function cloudPush(silent){if(CBUSY)return;CBUSY=true;try{const r=await srvFetch("/data",{method:"PUT",headers:{"Content-Type":"application/json"},body:snapshot()});if(r.status===401)throw new Error("كلمة السر غلط");if(!r.ok)throw new Error("("+r.status+")");localStorage.setItem("wl_srv_on","1");localStorage.setItem("wl_cloud_last",Date.now());CERR="";if(!silent){toast("تم الرفع للسيرفر");srvSheet()}}catch(e){CERR=e.message||String(e);if(!silent){toast("فشل الرفع");srvSheet()}}CBUSY=false}
+async function cloudPull(){CBUSY=true;try{const r=await srvFetch("/data");if(r.status===401)throw new Error("كلمة السر غلط");if(!r.ok)throw new Error("("+r.status+")");const rec=await r.json();if(!rec||!Array.isArray(rec.items)){CBUSY=false;return toast("ما كو نسخة على السيرفر بعد")}
+ if(!confirm("تستبدل قائمتك الحالية بنسخة السيرفر ("+rec.items.length+" عمل)؟")){CBUSY=false;return}
+ items=rec.items;save();if(rec.diary){DIARY=rec.diary;put("wl_diary_v1",DIARY)}if(rec.guides){GUIDES=rec.guides;put("wl_guides_v1",GUIDES)}if(rec.order){ORDER=rec.order;put("wl_order",ORDER)}
  if(rec.customCountries){rec.customCountries.forEach(c=>{if(!COUNTRIES.find(x=>x.code===c.code))COUNTRIES.push(c)});localStorage.setItem("cc",JSON.stringify(rec.customCountries))}
- localStorage.setItem("wl_cloud_last",Date.now());close();render();toast("تم الاسترجاع")}catch(e){CERR=e.message||String(e);toast("فشل الاسترجاع");cloudSheet()}CBUSY=false}
+ localStorage.setItem("wl_srv_on","1");localStorage.setItem("wl_cloud_last",Date.now());close();render();toast("تم الاسترجاع")}catch(e){CERR=e.message||String(e);toast("فشل الاسترجاع");srvSheet()}CBUSY=false}
 /* more tab */
-function more(){const t=+localStorage.getItem("wl_cloud_last");$("#app").innerHTML=`<h1>المزيد</h1><div class="lst">${[["m_cloud","☁️","المزامنة السحابية",t?"":"غير مفعلة"],["m_diary","📓","اليوميات",DIARY.length],["m_guides","📚","الأدلة",GUIDES.length],["m_trash","🗑️","سلة المحذوفات",TRASH.length],["m_order","↕️","ترتيب مخصص للقائمة",""],["m_posters","🖼️","جلب صور الأغلفة تلقائياً",items.filter(i=>!i.image).length+" ناقصة"],["m_country","🌍","إضافة دولة",""],["m_export","📦","تصدير نسخة احتياطية",""],["m_chk","🧹","فحص وتنظيف القائمة",""],["m_cols","🔗","ربط السلاسل من TMDB",""],["m_import","📥","استيراد نسخة احتياطية",""]].map(([x,i,l,n])=>`<button class="li" data-x="${x}"><span>${i} ${l}</span><span class="cm">${n}</span></button>`).join("")}</div><div class="lbl" style="padding:0 18px">لون التطبيق</div><div class="sw">${ACC.map(c=>`<button style="background:${c}" data-x="acc" data-k="${c}" aria-label="${c}"></button>`).join("")}</div><p class="sub" style="padding:26px 18px;font-size:11px;line-height:1.7;direction:ltr;text-align:left">This product uses the TMDB API but is not endorsed or certified by TMDB. Watch-provider data by JustWatch.</p>`}
-const X={m_cloud:cloudSheet,m_diary:diarySheet,m_guides:guidesSheet,m_trash:trashSheet,c_push:()=>cloudPush(false),c_pull:cloudPull,
+function more(){const t=+localStorage.getItem("wl_cloud_last");$("#app").innerHTML=`<h1>المزيد</h1><div class="lst">${[["m_cloud","☁️","السيرفر والمزامنة",srv()?"":"غير مفعّل"],["m_diary","📓","اليوميات",DIARY.length],["m_guides","📚","الأدلة",GUIDES.length],["m_trash","🗑️","سلة المحذوفات",TRASH.length],["m_order","↕️","ترتيب مخصص للقائمة",""],["m_posters","🖼️","جلب صور الأغلفة تلقائياً",items.filter(i=>!i.image).length+" ناقصة"],["m_country","🌍","إضافة دولة",""],["m_export","📦","تصدير نسخة احتياطية",""],["m_stats","📊","إحصائياتي",""],["m_chk","🧹","فحص وتنظيف القائمة",""],["m_cols","🔗","ربط السلاسل من TMDB",""],["m_import","📥","استيراد نسخة احتياطية",""]].map(([x,i,l,n])=>`<button class="li" data-x="${x}"><span>${i} ${l}</span><span class="cm">${n}</span></button>`).join("")}</div><div class="lbl" style="padding:0 18px">لون التطبيق</div><div class="sw">${ACC.map(c=>`<button style="background:${c}" data-x="acc" data-k="${c}" aria-label="${c}"></button>`).join("")}</div><p class="sub" style="padding:26px 18px;font-size:11px;line-height:1.7;direction:ltr;text-align:left">This product uses the TMDB API but is not endorsed or certified by TMDB. Watch-provider data by JustWatch.</p>`}
+const X={m_cloud:srvSheet,m_diary:diarySheet,m_guides:guidesSheet,m_trash:trashSheet,c_push:()=>cloudPush(false),c_pull:cloudPull,
  acc:k=>{setAcc(k);toast("تم تغيير اللون")},grp:()=>{GM=!GM;localStorage.setItem("wl_group_mode",GM?"1":"0");lib()},reord:reordSheet,
  grp_open:k=>{const g=buildGroups(items).groups.find(g=>g.key===k);if(g)sheet(`<h2>${E(k)}</h2><div class="grid">${g.members.map(card).join("")}</div>`)},
  tr_back:k=>{items.push(TRASH[k].item);TRASH.splice(k,1);put("wl_trash_v1",TRASH);save();trashSheet();toast("تم الاسترجاع")},
@@ -202,10 +198,9 @@ let IPCB=null;const ip=document.createElement("input");ip.type="file";ip.accept=
 ip.onchange=()=>{const f=ip.files[0];ip.value="";if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const w=Math.min(400,im.width),h=Math.round(im.height*w/im.width),c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);IPCB&&IPCB(c.toDataURL("image/jpeg",.8))};im.src=r.result};r.readAsDataURL(f)};
 const pickImg=cb=>{IPCB=cb;ip.click()};
 const refresh=()=>S.tab==="lib"?fill():S.tab==="series"?serFill():S.tab==="home"?home():more();
-const OM="https://www.omdbapi.com/?apikey=da2431a6";
 const CMAP={"United States":"en","USA":"en","United Kingdom":"gb","UK":"gb","South Korea":"ko","Korea":"ko","Japan":"ja","Turkey":"tr","Türkiye":"tr","Spain":"es","France":"fr","Germany":"de","West Germany":"de","Italy":"it","China":"zh","Hong Kong":"zh","Taiwan":"zh","India":"hi","Brazil":"pt","Portugal":"pt","Russia":"ru","Soviet Union":"ru","Iran":"fa","Egypt":"ar","Saudi Arabia":"ar","Lebanon":"ar","Syria":"ar","Jordan":"ar","United Arab Emirates":"ar","Kuwait":"ar","Qatar":"ar","Bahrain":"ar","Oman":"ar","Yemen":"ar","Libya":"ar","Tunisia":"ar","Algeria":"ar","Morocco":"ar","Sudan":"ar","Palestine":"ar"};
 function mapC(s){const f=s.split(",")[0].trim(),syn={Iraq:"العراق",Norway:"النرويج",Sweden:"السويد"};if(syn[f]){const c=COUNTRIES.find(c=>c.label===syn[f]);if(c)return c.code}return CMAP[f]||null}
-const omdb=async(n,y)=>(await fetch(OM+"&t="+encodeURIComponent(n)+(y?"&y="+y:""))).json();
+const omdb=async(n,y)=>(await omf("t="+encodeURIComponent(n)+(y?"&y="+y:""))).json();
 function infoOf(d){const o={},y=(d.Year||"").match(/\d{4}/);if(y)o.year=+y[0];if(d.Type==="series"||d.Type==="movie")o.type=d.Type;if(d.imdbRating&&d.imdbRating!=="N/A")o.imdb=parseFloat(d.imdbRating);if(d.Country&&d.Country!=="N/A"){const c=mapC(d.Country);if(c)o.country=c}if(d.Poster&&d.Poster!=="N/A")o.image=d.Poster;return o}
 /* add form */
 let AF={};
@@ -229,8 +224,9 @@ Object.assign(X,{
  m_country:()=>sheet(`<h2>إضافة دولة</h2><div class="lbl">الاسم</div><input class="in" id="c_l"><div class="lbl">العلم (إيموجي)</div><input class="in" id="c_f" value="🏳️"><button class="btn" data-x="c_save">إضافة</button>`),
  c_save:()=>{const l=$("#c_l").value.trim();if(!l)return toast("اكتب اسم الدولة");COUNTRIES.push({code:"c_"+Date.now(),label:l,flag:$("#c_f").value.trim()||"🏳️"});localStorage.setItem("cc",JSON.stringify(COUNTRIES.filter(c=>c.code.startsWith("c_"))));close();toast("تمت إضافة "+l)}});
 /* TMDB */
-const TK="0f8fa9835af040648d1b8e34b1b97732",TB="https://api.themoviedb.org/3",TI="https://image.tmdb.org/t/p/w342";
-const tm=async p=>{const r=await fetch(TB+p+(p.includes("?")?"&":"?")+"api_key="+TK);if(!r.ok)throw new Error(r.status);return r.json()};
+const TI="https://image.tmdb.org/t/p/w342";
+const tm=async p=>{const r=await srvFetch("/tmdb"+p);if(!r.ok)throw new Error(r.status);return r.json()};
+const omf=qs=>srvFetch("/omdb?"+qs);
 const TOC={US:"en",GB:"gb",KR:"ko",JP:"ja",TR:"tr",ES:"es",FR:"fr",DE:"de",IT:"it",CN:"zh",HK:"zh",TW:"zh",IN:"hi",BR:"pt",PT:"pt",RU:"ru",IR:"fa",EG:"ar",SA:"ar",LB:"ar",SY:"ar",JO:"ar",AE:"ar",KW:"ar",QA:"ar",MA:"ar",TN:"ar",DZ:"ar",PS:"ar"},TLG={en:"en",ko:"ko",ja:"ja",tr:"tr",ar:"ar",es:"es",fr:"fr",de:"de",it:"it",zh:"zh",cn:"zh",hi:"hi",pt:"pt",ru:"ru",fa:"fa"};
 const tmC=(oc,lg)=>{const sy={IQ:"العراق",NO:"النرويج",SE:"السويد"};if(sy[oc]){const c=COUNTRIES.find(c=>c.label===sy[oc]);if(c)return c.code}return TOC[oc]||TLG[lg]||"other"};
 const tmType=(d,mt)=>{const g=(d.genres||[]).map(x=>x.id);if(g.includes(99))return"documentary";if(g.includes(16))return d.original_language==="ja"?"anime":"cartoon";return mt==="tv"?"series":"movie"};
@@ -238,7 +234,7 @@ const yr=r=>+((r.release_date||r.first_air_date||"").slice(0,4));
 function sugHtml(){return`<div style="margin-top:10px">${AF.sug.map((r,k)=>`<button class="li" data-x="a_pickres" data-k="${k}" style="width:100%;text-align:right;gap:10px"><img src="${r.poster_path?"https://image.tmdb.org/t/p/w92"+r.poster_path:""}" style="width:34px;height:50px;border-radius:5px;object-fit:cover;background:var(--s2)" alt=""><span style="flex:1;min-width:0"><b class="ct" style="display:block;font-size:14px;color:var(--tx)">${E(r.title||r.name)}</b><span class="cm">${yr(r)||""} • ${r.media_type==="tv"?"مسلسل":"فيلم"}</span></span></button>`).join("")}</div>`}
 async function tmFill(r,mt){toast("جاري جلب المعلومات...");try{const d=await tm(`/${mt}/${r.id}?language=en-US&append_to_response=external_ids`),ar=d.original_language==="ar",dt=d.release_date||d.first_air_date||"";
  let imdb=+(d.vote_average||0).toFixed(1);const iid=(d.external_ids||{}).imdb_id||d.imdb_id;
- if(iid){try{const o=await(await fetch(OM+"&i="+iid)).json();if(o.imdbRating&&o.imdbRating!=="N/A")imdb=parseFloat(o.imdbRating)}catch(e){}}
+ if(iid){try{const o=await(await omf("i="+iid)).json();if(o.imdbRating&&o.imdbRating!=="N/A")imdb=parseFloat(o.imdbRating)}catch(e){}}
  const oc=(d.origin_country||[])[0]||((d.production_countries||[])[0]||{}).iso_3166_1;
  Object.assign(AF,{name:ar?(d.original_title||d.original_name):(d.title||d.name),type:tmType(d,mt),country:tmC(oc,d.original_language),year:dt.slice(0,4),imdb:imdb||"",image:d.poster_path?TI+d.poster_path:AF.image,tm:{id:d.id,mt},sug:null});
  addForm();toast("تم جلب المعلومات، راجعها قبل الحفظ")}catch(e){toast("فشل الجلب، تأكد من الإنترنت")}}
@@ -282,8 +278,8 @@ async function linkCols(){const m=items.filter(i=>!i.colc&&["movie","cartoon","a
  save();GM=true;localStorage.setItem("wl_group_mode","1");render();toast("تم! "+f+" عمل انربط بسلسلة")}
 const frDone=k=>{save();detail(k);refresh()};
 Object.assign(X,{grp_open:k=>{GK=k;grpSheet()},g_open:detail,
- g_st:k=>{const i=items.find(x=>x.id==k);i.status={unwatched:"watching",watching:"watched",watched:"unwatched"}[i.status];save();grpSheet();refresh()},
- g_all:()=>{const g=groupMap().get(GK.toLowerCase());if(g&&confirm("تعليم كل أعمال السلسلة كمشاهدة؟")){g.members.forEach(m=>m.status="watched");save();grpSheet();refresh()}},
+ g_st:k=>{const i=items.find(x=>x.id==k);i.status={unwatched:"watching",watching:"watched",watched:"unwatched"}[i.status];if(i.status==="watched"&&!i.watchedAt)i.watchedAt=Date.now();save();grpSheet();refresh()},
+ g_all:()=>{const g=groupMap().get(GK.toLowerCase());if(g&&confirm("تعليم كل أعمال السلسلة كمشاهدة؟")){g.members.forEach(m=>{m.status="watched";if(!m.watchedAt)m.watchedAt=Date.now()});save();grpSheet();refresh()}},
  m_cols:linkCols,
  e_fr:k=>{const i=items.find(x=>x.id==k);sheet(`<h2>السلسلة</h2><div class="sub" style="padding:2px 0 8px">الأعمال اللي تحمل نفس الاسم تنجمع مع بعض</div><input class="in" id="fr_n" value="${E(i.fr&&i.fr!=="-"?i.fr:fkey(i)||"")}"><button class="btn" data-x="fr_save" data-k="${k}">حفظ لهذا العمل</button><button class="btn" data-x="fr_all" data-k="${k}" style="background:var(--s2);color:var(--tx);margin-top:10px">تسمية كل أعمال سلسلته بهذا الاسم</button><div class="two"><button class="btn" data-x="fr_none" data-k="${k}" style="background:var(--s2);color:var(--tx)">بدون سلسلة</button><button class="btn" data-x="fr_auto" data-k="${k}" style="background:var(--s2);color:var(--tx)">تلقائي</button></div>`)},
  fr_save:k=>{const v=$("#fr_n").value.trim(),i=items.find(x=>x.id==k);v?i.fr=v:delete i.fr;frDone(k)},
@@ -314,7 +310,7 @@ function chkSheet(){const row=(l,v)=>`<div class="li"><span>${l}</span><span cla
  <button class="btn" data-x="ck_dup" style="margin-top:8px">1. معالجة المكررات</button><button class="btn" data-x="ck_ver" style="margin-top:10px;background:var(--s2);color:var(--tx)">2. تحقق وتصحيح تلقائي من TMDB</button><button class="btn" data-x="ck_rev" style="margin-top:10px;background:var(--s2);color:var(--tx)">3. مراجعة المشبوهة (${REV.length})</button>`)}
 const thumb=m=>`<div class="poster" style="width:36px;flex:none;border-radius:6px;padding:0">${m.image?`<img loading="lazy" src="${E(m.image)}" onerror="this.remove()" alt="">`:""}</div>`;
 function dupSheet(){const gs=dupGroups();sheet(`<h2>المكررات</h2>${gs.length?`<button class="btn" data-x="dp_auto" style="margin:10px 0 4px">دمج الكل تلقائياً (${gs.length})</button><div class="sub" style="padding:4px 0 8px">يحتفظ بالنسخة الأكمل (مشاهدة، تقييم، ملاحظة) ويدمج معلومات الباقي. المحذوف يروح لسلة المحذوفات.</div>`:'<div class="empty">ما كو مكررات 🎉</div>'}${gs.map(g=>`<div class="lbl">${E(g[0].name)}</div>${g.map(m=>`<div class="gr">${thumb(m)}<span style="flex:1;min-width:0"><b class="ct" style="display:block;font-size:14px">${E(m.name)}</b><span class="cm">${m.year||"بدون سنة"} • ${SI[m.status]}${m.note?" • 📝":""}${m.myRating?" • "+"★".repeat(m.myRating):""}</span></span><button data-x="dp_keep" data-k="${m.id}" style="color:var(--ac);font-size:13px">احتفظ بهذا</button></div>`).join("")}`).join("")}<button class="btn" data-x="ck_back" style="background:var(--s2);color:var(--tx)">رجوع</button>`)}
-async function tmData(r,mt){const d=await tm(`/${mt}/${r.id}?language=en-US&append_to_response=external_ids`),ar=d.original_language==="ar",dt=d.release_date||d.first_air_date||"";let imdb=+(d.vote_average||0).toFixed(1);const iid=(d.external_ids||{}).imdb_id||d.imdb_id;if(iid){try{const o=await(await fetch(OM+"&i="+iid)).json();if(o.imdbRating&&o.imdbRating!=="N/A")imdb=parseFloat(o.imdbRating)}catch(e){}}const oc=(d.origin_country||[])[0]||((d.production_countries||[])[0]||{}).iso_3166_1;return{name:ar?(d.original_title||d.original_name):(d.title||d.name),type:tmType(d,mt),country:tmC(oc,d.original_language),year:+dt.slice(0,4)||null,imdb:imdb||0,image:d.poster_path?TI+d.poster_path:"",tm:{id:d.id,mt}}}
+async function tmData(r,mt){const d=await tm(`/${mt}/${r.id}?language=en-US&append_to_response=external_ids`),ar=d.original_language==="ar",dt=d.release_date||d.first_air_date||"";let imdb=+(d.vote_average||0).toFixed(1);const iid=(d.external_ids||{}).imdb_id||d.imdb_id;if(iid){try{const o=await(await omf("i="+iid)).json();if(o.imdbRating&&o.imdbRating!=="N/A")imdb=parseFloat(o.imdbRating)}catch(e){}}const oc=(d.origin_country||[])[0]||((d.production_countries||[])[0]||{}).iso_3166_1;return{name:ar?(d.original_title||d.original_name):(d.title||d.name),type:tmType(d,mt),country:tmC(oc,d.original_language),year:+dt.slice(0,4)||null,imdb:imdb||0,image:d.poster_path?TI+d.poster_path:"",tm:{id:d.id,mt}}}
 async function applyTo(i,r,mt){toast("جاري التطبيق...");try{const f=await tmData(r,mt);i.name=f.name;if(f.year)i.year=f.year;if(f.imdb)i.imdb=f.imdb;if(f.image&&!(i.image||"").startsWith("data:"))i.image=f.image;if(f.country!=="other")i.country=f.country;i.tm=f.tm;delete i.col;delete i.colc;if((mt==="tv")===(i.type==="movie"))i.type=f.type;i.chk=1;save()}catch(e){toast("فشل التطبيق")}}
 async function runVerify(){if(VBUSY)return;const todo=items.filter(i=>!i.chk);if(!todo.length)return toast("كل الأعمال انفحصت");VBUSY=true;REV=[];let n=0,ok=0,er=0;const st=t=>{const e=$("#vp");if(e)e.textContent=t};
  for(const i of todo){try{const s=(await tm("/search/multi?query="+encodeURIComponent(i.name)+"&language=en-US")).results.filter(r=>r.media_type==="movie"||r.media_type==="tv");let best=null,bs=0;
@@ -369,7 +365,43 @@ function nsRefresh(){const sel=NS.ids.map(id=>items.find(x=>x.id==id)).filter(Bo
 Object.assign(X,{ns_new:()=>{NS={name:"",ids:[]};nsSheet()},ns_cancel:close,ns_add:k=>{NS.ids.push(+k);nsRefresh()},ns_rm:k=>{NS.ids=NS.ids.filter(x=>x!=k);nsRefresh()},
  ns_save:()=>{const n=$("#ns_n").value.trim();if(!n)return toast("اكتب اسم السلسلة");if(NS.ids.length<2)return toast("اختر عملين على الأقل");NS.ids.forEach(id=>{items.find(x=>x.id==id).fr=n});save();SS.f="all";SS.q="";GK=n;refresh();grpSheet();toast("تم إنشاء السلسلة")}});
 document.addEventListener("input",e=>{if(e.target.id==="ns_q")nsRefresh();if(e.target.id==="ns_n")NS.name=e.target.value});
+/* stats + upcoming */
+let UP=LS("wl_up",{}),UPBUSY=false;
+const dayDiff=s=>{const a=new Date(s+"T00:00:00"),b=new Date();b.setHours(0,0,0,0);return Math.round((a-b)/864e5)};
+const dayTxt=n=>n===0?"اليوم":n===1?"بكرة":n===2?"بعد يومين":"بعد "+n+" يوم";
+async function upRefresh(){if(UPBUSY)return;UPBUSY=true;const now=Date.now(),todo=items.filter(i=>i.tm&&i.tm.mt==="tv"&&i.status!=="unwatched"&&(!UP[i.id]||now-UP[i.id].t>432e5)).slice(0,60);let ch=0;
+ for(const i of todo){try{const d=await tm("/tv/"+i.tm.id+"?language=en-US"),n=d.next_episode_to_air;UP[i.id]={t:now,n:n&&n.air_date?{d:n.air_date,s:n.season_number,e:n.episode_number}:null};ch++}catch(e){}await new Promise(r=>setTimeout(r,80))}
+ put("wl_up",UP);UPBUSY=false;if(ch&&S.tab==="home")home()}
+function upSec(){const l=items.filter(i=>UP[i.id]&&UP[i.id].n&&dayDiff(UP[i.id].n.d)>=0&&dayDiff(UP[i.id].n.d)<=90).sort((a,b)=>UP[a.id].n.d.localeCompare(UP[b.id].n.d));if(!l.length)return"";
+ return`<div class="sec"><div class="hd"><h2>📅 حلقات قادمة</h2></div><div class="row">${l.slice(0,15).map(i=>{const n=UP[i.id].n;return`<button class="card" data-id="${i.id}"><div class="poster">${E(i.name)}${i.image?`<img loading="lazy" src="${E(i.image)}" onerror="this.remove()" alt="">`:""}<span class="pill" style="color:var(--tx)">${dayTxt(dayDiff(n.d))}</span></div><div class="ct">${E(i.name)}</div><div class="cm">م${n.s} • ح${n.e}</div></button>`}).join("")}</div></div>`}
+function statsSheet(){const W=items.filter(i=>i.status==="watched"),G=items.filter(i=>i.status==="watching"),n=items.length||1,d=new Date(),ms=new Date(d.getFullYear(),d.getMonth(),1).getTime(),ys=new Date(d.getFullYear(),0,1).getTime();
+ const mo=W.filter(i=>i.watchedAt>=ms).length,yy=W.filter(i=>i.watchedAt>=ys).length,rt=W.filter(i=>i.myRating>0),im=W.filter(i=>i.imdb>0);
+ const avg=rt.length?(rt.reduce((a,i)=>a+i.myRating,0)/rt.length).toFixed(1):"—",aim=im.length?(im.reduce((a,i)=>a+i.imdb,0)/im.length).toFixed(1):"—";
+ const bar=(l,p,t)=>`<div class="gr" style="gap:10px"><span style="width:92px;font-size:13px">${l}</span><div class="bar" style="flex:1;margin:0"><i style="width:${p}%"></i></div><span class="cm" style="width:46px;text-align:left">${t}</span></div>`;
+ const cc={};W.forEach(i=>cc[i.country]=(cc[i.country]||0)+1);const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,5),mx=tc[0]?tc[0][1]:1;
+ const fav=rt.filter(i=>i.myRating>=4).sort((a,b)=>b.myRating-a.myRating||(b.imdb||0)-(a.imdb||0)).slice(0,5);
+ const row=(l,v)=>`<div class="li"><span>${l}</span><span class="cm">${v}</span></div>`;
+ sheet(`<h2>إحصائياتي</h2><div class="stats" style="margin:12px 0 0"><div class="nums"><div><b>${W.length}</b><span>شاهدت</span></div><div><b>${G.length}</b><span>جاري</span></div><div><b>${items.length-W.length-G.length}</b><span>بالانتظار</span></div></div><div class="bar"><i style="width:${Math.round(W.length/n*100)}%"></i></div></div>
+ <div class="lst" style="margin:12px 0 0">${row("شاهدت هذا الشهر",mo)}${row("شاهدت هذه السنة",yy)}${row("متوسط تقييمي",avg+" ★")}${row("متوسط IMDb لما شاهدته",aim)}</div>
+ <div class="lbl">حسب النوع (شاهدت / الكل)</div>${TYPES.map(([k,l])=>{const t=items.filter(i=>i.type===k).length,w=W.filter(i=>i.type===k).length;return bar(l,t?Math.round(w/t*100):0,w+"/"+t)}).join("")}
+ ${tc.length?`<div class="lbl">أكثر البلدان مشاهدة</div>${tc.map(([c,v])=>bar(flag(c)+" "+((COUNTRIES.find(x=>x.code===c)||{}).label||c),Math.round(v/mx*100),v)).join("")}`:""}
+ ${fav.length?`<div class="lbl">أفضل أعمالك</div>${fav.map(i=>`<div class="li"><span class="ct">${E(i.name)}</span><span style="color:var(--gold)">${"★".repeat(i.myRating)}</span></div>`).join("")}`:""}
+ <p class="sub" style="padding:14px 0 0;font-size:11.5px">عدّاد الشهر والسنة يحسب من تاريخ تعليم العمل كمشاهد، فيبدأ من هسه للأعمال القديمة.</p>`)}
+Object.assign(X,{m_stats:statsSheet});
+setTimeout(upRefresh,1500);
+Object.assign(X,{sv_save:async()=>{const u=$("#sv_u").value.trim().replace(/\/+$/,""),k=$("#sv_t").value.trim();if(!/^https:\/\//.test(u)||!k)return toast("اكتب الرابط وكلمة السر");put("wl_srv",{url:u,token:k});toast("جاري الاختبار...");try{const r=await srvFetch("/data");CERR=r.status===401?"كلمة السر غلط":r.ok?"":"خطأ ("+r.status+")";toast(r.ok?"الاتصال شغّال ✓":CERR)}catch(e){CERR="ما كدرت أوصل للسيرفر";toast(CERR)}srvSheet()}});
+/* guide links */
+let GBACK=null;
+function linkRe(){const m=new Map();items.forEach(i=>{const n=(i.name||"").trim();if(n.length<3)return;const k=nz(n);if(k&&!m.has(k))m.set(k,{n,id:i.id})});
+ const esc=s=>s.split(/[^\p{L}\p{N}]+/u).filter(Boolean).map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("[^\\p{L}\\p{N}]+");
+ const names=[...m.values()].map(v=>v.n).sort((a,b)=>b.length-a.length).map(esc).filter(Boolean);
+ return{re:names.length?new RegExp("(?<![\\p{L}\\p{N}])(?:"+names.join("|")+")(?![\\p{L}\\p{N}])","giu"):null,m}}
+function linkify(txt){const{re,m}=linkRe();if(!re)return E(txt);let out="",last=0,r;re.lastIndex=0;
+ while((r=re.exec(txt))){if(!r[0].length){re.lastIndex++;continue}out+=E(txt.slice(last,r.index));const v=m.get(nz(r[0]));out+=v?`<a class="lk" data-x="g_link" data-k="${v.id}">${E(r[0])}</a>`:E(r[0]);last=r.index+r[0].length}
+ return out+E(txt.slice(last))}
+let GCUR=null;
+Object.assign(X,{g_link:k=>{GBACK=GCUR;detail(k)},g_back:()=>{if(GBACK)guideView(GBACK)}});
 document.addEventListener("click",e=>{const t=e.target.closest("[data-x]");if(t&&X[t.dataset.x])X[t.dataset.x](t.dataset.k)});
 document.addEventListener("input",e=>{if(e.target.id==="d_q")dOpts(e.target.value)});
-render();if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+render();setTimeout(()=>{if(!srv())toast("فعّل السيرفر من المزيد ← السيرفر والمزامنة")},1500);if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
