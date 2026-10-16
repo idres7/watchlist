@@ -83,6 +83,9 @@ html,body{overflow-x:clip}#app{width:100%;overflow-x:clip}
 .stars .half{background:linear-gradient(to left,var(--gold) 50%,var(--ln) 50%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .lst2{display:block;padding:0 18px}.lrow{display:flex!important;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ln)}.lrow .lp{width:42px;height:62px;flex:none;border-radius:6px;background:var(--s2);overflow:hidden}.lrow .lp img{width:100%;height:100%;object-fit:cover}.lrow .lt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.lrow b{font-size:14px;line-height:1.4}.lrow small{color:var(--mu);font-size:12px}.lrow .ls{flex:none;font-size:13px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}.lrow.sel{background:rgba(124,156,255,.15)}
 #srvbar{position:fixed;top:calc(8px + env(safe-area-inset-top));inset-inline:10px;max-width:500px;margin:0 auto;background:#3a2a10;border:1px solid var(--gold);color:var(--tx);padding:10px 14px;border-radius:12px;font-size:12.5px;line-height:1.7;z-index:40}
+#bkbar{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom));inset-inline:12px;max-width:496px;margin:0 auto;background:var(--s1);border:1px solid var(--gold);border-radius:14px;padding:10px 12px;display:flex;gap:8px;align-items:center;font-size:12.5px;line-height:1.6;z-index:12}
+#bkbar span{flex:1}#bkbar button{background:var(--ac);color:#0e0f12;border-radius:14px;padding:6px 12px;font-weight:700;font-size:12px}#bkbar button+button{background:var(--s2);color:var(--tx)}
+.qrd{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.qrb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 </style></head><body>
 <div id="app"></div>
 <nav id="nav"></nav><div class="veil" id="veil"></div><div class="sheet" id="sheet"></div><div class="toast" id="toast"></div>
@@ -105,7 +108,7 @@ function ccApply(){let cu=[];try{cu=JSON.parse(localStorage.getItem("cc")||"[]")
  COUNTRIES.length=0;out.forEach(c=>COUNTRIES.push(c))}
 ccApply();
 try{if(!localStorage.getItem("wl_chk0")){items.forEach(i=>{delete i.chk});localStorage.setItem("wl_chk0","1")}}catch(e){}
-const save=()=>{if(SEEDING)return;try{localStorage.setItem(SK,JSON.stringify(items))}catch(e){}scheduleCloudPush()};save();
+const save=()=>{if(SEEDING)return;try{localStorage.setItem(SK,JSON.stringify(items))}catch(e){}scheduleCloudPush();typeof idbQueue==="function"&&idbQueue()};save();
 const flag=c=>(COUNTRIES.find(x=>x.code===c)||{flag:"🌍"}).flag;
 const E=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const $=s=>document.querySelector(s);
@@ -209,7 +212,7 @@ async function cloudPull(pth){CBUSY=true;try{const r=await srvFetch(typeof pth==
 <script>
 /* ── قسم 2 ── */
 /* more tab */
-function more(){const t=+localStorage.getItem("wl_cloud_last");$("#app").innerHTML=`<h1>المزيد</h1><button class="chip" data-x="mo_edit" style="margin:0 18px 12px">${MEDIT?"✔ تم الترتيب":"↕ ترتيب القائمة"}</button><div class="lst">${moreSort([["m_cloud","☁️","السيرفر والمزامنة",srv()?"":"غير مفعّل"],["m_trash","🗑️","سلة المحذوفات",TRASH.length],["m_ords","📋","قوائم الترتيب (ترتيب المشاهدة)",ORDS.length||""],["m_smart","🎯","اختيار ذكي (وقت ومزاج)",""],["m_genres","🎭","جلب الأنواع والأسماء البديلة",items.filter(i=>i.tm&&(!i.gn||i.rt===undefined||i.an===undefined||i.tr===undefined||i.ep===undefined||i.iid===undefined)).length+" ناقصة"],["m_err","🐞","سجل الأخطاء",(()=>{try{return JSON.parse(localStorage.getItem("wl_err")||"[]").length||""}catch(e){return""}})()],["m_home","🏠","تخصيص الرئيسية",""],["m_vec","🧠","فهرسة ذكية (للتوصيات والبحث)",""],["m_notif","🔔","الإشعارات (حلقات جديدة)",""],["m_cv","🖼️","مدقق الأغلفة (فحص + إكمال + مراجعة)",items.filter(i=>(!i.image||i.cf)&&!i.cv).length||""],["m_bulk","📋","إضافة قائمة أسماء",""],["m_vf","🔍","مدقق المطابقة (الاسم والمعلومات والتقييم)",items.filter(i=>i.mf&&!i.vc).length||""],["m_theme","🎨","الثيمات (الألوان والأسود الكامل)",""],["m_country","🌍","إدارة الدول (إضافة / تعديل / حذف)",""],["m_export","📦","تصدير نسخة احتياطية",""],["m_stats","📊","إحصائياتي",""],["m_chk","🧹","فحص وتنظيف القائمة",""],["m_import","📥","استيراد نسخة احتياطية",""]]).map(([x,i,l,n])=>MEDIT?`<div class="li" style="cursor:default"><span>${i} ${l}</span><span style="display:flex;gap:2px;flex:none">${[["first","⤒"],["up","▲"],["dn","▼"],["mid","↔"]].map(([o,s])=>`<button data-x="mo_m" data-k="${x}|${o}" style="padding:6px 9px;font-size:15px">${s}</button>`).join("")}</span></div>`:`<button class="li" data-x="${x}"><span>${i} ${l}</span><span class="cm">${n}</span></button>`).join("")}</div><p class="sub" style="padding:26px 18px;font-size:11px;line-height:1.7;direction:ltr;text-align:left">This product uses the TMDB API but is not endorsed or certified by TMDB. Watch-provider data by JustWatch.</p>`}
+function more(){const t=+localStorage.getItem("wl_cloud_last");$("#app").innerHTML=`<h1>المزيد</h1><button class="chip" data-x="mo_edit" style="margin:0 18px 12px">${MEDIT?"✔ تم الترتيب":"↕ ترتيب القائمة"}</button><div class="lst">${moreSort([["m_cloud","☁️","السيرفر والمزامنة",srv()?"":"غير مفعّل"],["m_trash","🗑️","سلة المحذوفات",TRASH.length],["m_ords","📋","قوائم الترتيب (ترتيب المشاهدة)",ORDS.length||""],["m_smart","🎯","اختيار ذكي (وقت ومزاج)",""],["m_genres","🎭","جلب الأنواع والأسماء البديلة",items.filter(i=>i.tm&&(!i.gn||i.rt===undefined||i.an===undefined||i.tr===undefined||i.ep===undefined||i.iid===undefined)).length+" ناقصة"],["m_err","🐞","سجل الأخطاء",(()=>{try{return JSON.parse(localStorage.getItem("wl_err")||"[]").length||""}catch(e){return""}})()],["m_home","🏠","تخصيص الرئيسية",""],["m_vec","🧠","فهرسة ذكية (للتوصيات والبحث)",""],["m_notif","🔔","الإشعارات (حلقات جديدة)",""],["m_cv","🖼️","مدقق الأغلفة (فحص + إكمال + مراجعة)",items.filter(i=>(!i.image||i.cf)&&!i.cv).length||""],["m_bulk","📋","إضافة قائمة أسماء",""],["m_vf","🔍","مدقق المطابقة (الاسم والمعلومات والتقييم)",items.filter(i=>i.mf&&!i.vc).length||""],["m_theme","🎨","الثيمات (الألوان والأسود الكامل)",""],["m_country","🌍","إدارة الدول (إضافة / تعديل / حذف)",""],["m_qr","⭐","تقييم وتواريخ سريعة",qrList().length||""],["m_safe","🛟","النسخ التلقائية والاسترجاع",""],["m_export","📦","تصدير نسخة احتياطية",""],["m_stats","📊","إحصائياتي",""],["m_chk","🧹","فحص وتنظيف القائمة",""],["m_import","📥","استيراد نسخة احتياطية",""]]).map(([x,i,l,n])=>MEDIT?`<div class="li" style="cursor:default"><span>${i} ${l}</span><span style="display:flex;gap:2px;flex:none">${[["first","⤒"],["up","▲"],["dn","▼"],["mid","↔"]].map(([o,s])=>`<button data-x="mo_m" data-k="${x}|${o}" style="padding:6px 9px;font-size:15px">${s}</button>`).join("")}</span></div>`:`<button class="li" data-x="${x}"><span>${i} ${l}</span><span class="cm">${n}</span></button>`).join("")}</div><p class="sub" style="padding:26px 18px;font-size:11px;line-height:1.7;direction:ltr;text-align:left">This product uses the TMDB API but is not endorsed or certified by TMDB. Watch-provider data by JustWatch.</p>`}
 const X={m_cloud:srvSheet,m_diary:diarySheet,m_guides:guidesSheet,m_theme:()=>themeSheet(),m_trash:trashSheet,c_push:()=>cloudPush(false),c_pull:cloudPull,
  acc:k=>{setAcc(k);toast("تم تغيير اللون")},grp:()=>{GM=!GM;localStorage.setItem("wl_group_mode",GM?"1":"0");lib()},reord:reordSheet,
  grp_open:k=>{const g=buildGroups(items).groups.find(g=>g.key===k);if(g)sheet(`<h2>${E(k)}</h2><div class="grid">${g.members.map(card).join("")}</div>`)},
@@ -250,8 +253,8 @@ const readAF=()=>{const g=id=>{const e=$("#"+id);return e?e.value:null};AF.name=
 <script>
 /* ── قسم 5 ── */
 /* backup + posters + country */
-function exportData(){const b=new Blob([JSON.stringify({items,diary:DIARY,guides:GUIDES,order:ORDER,orders:ORDS,customCountries:COUNTRIES.filter(c=>c.code.startsWith("c_")),countryEdits:CCOVR(),countryDel:CCDEL(),exportedAt:new Date().toISOString()},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="watchlist_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast("تم تصدير النسخة")}
-function importData(){const f=document.createElement("input");f.type="file";f.accept=".json";f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.items))return toast("ملف غير صحيح");if(!confirm("رح تستبدل قائمتك الحالية بالنسخة ("+d.items.length+" عمل). متأكد؟"))return;items=d.items;if(d.diary){DIARY=d.diary;put("wl_diary_v1",DIARY)}if(d.guides){GUIDES=d.guides;put("wl_guides_v1",GUIDES)}if(d.order){ORDER=d.order;put("wl_order",ORDER)}if(d.orders){ORDS=d.orders;ordSave()}if(d.customCountries)localStorage.setItem("cc",JSON.stringify(d.customCountries));localStorage.setItem("wl_cc_del",JSON.stringify(d.countryDel||[]));localStorage.setItem("wl_cc_ovr",JSON.stringify(d.countryEdits||{}));ccApply();ccSave();save();render();toast("تم استيراد "+items.length+" عمل")}catch(e){toast("خطأ في الملف")}};r.readAsText(file)};f.click()}
+function exportData(){const b=new Blob([JSON.stringify({items,diary:DIARY,guides:GUIDES,order:ORDER,orders:ORDS,customCountries:COUNTRIES.filter(c=>c.code.startsWith("c_")),countryEdits:CCOVR(),countryDel:CCDEL(),exportedAt:new Date().toISOString()},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="watchlist_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);localStorage.setItem("wl_last_backup",Date.now());document.getElementById("bkbar")&&document.getElementById("bkbar").remove();toast("تم تصدير النسخة")}
+function importData(){const f=document.createElement("input");f.type="file";f.accept=".json";f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.items))return toast("ملف غير صحيح");if(!confirm("رح تستبدل قائمتك الحالية بالنسخة ("+d.items.length+" عمل). متأكد؟"))return;idbSnap("pre-import");items=d.items;if(d.diary){DIARY=d.diary;put("wl_diary_v1",DIARY)}if(d.guides){GUIDES=d.guides;put("wl_guides_v1",GUIDES)}if(d.order){ORDER=d.order;put("wl_order",ORDER)}if(d.orders){ORDS=d.orders;ordSave()}if(d.customCountries)localStorage.setItem("cc",JSON.stringify(d.customCountries));localStorage.setItem("wl_cc_del",JSON.stringify(d.countryDel||[]));localStorage.setItem("wl_cc_ovr",JSON.stringify(d.countryEdits||{}));ccApply();ccSave();save();render();toast("تم استيراد "+items.length+" عمل")}catch(e){toast("خطأ في الملف")}};r.readAsText(file)};f.click()}
 Object.assign(X,{
  a_fetch:async()=>{readAF();if(!AF.name.trim())return toast("اكتب اسم العمل أول");toast("جاري البحث...");try{const d=await omdb(AF.name.trim());if(d.Response==="False")return toast("ما لقيت معلومات لهذا الاسم");const o=infoOf(d);if(o.year)AF.year=o.year;if(o.type)AF.type=o.type;if(o.imdb)AF.imdb=o.imdb;if(o.country)AF.country=o.country;if(o.image&&!AF.image)AF.image=o.image;addForm();toast("تم جلب المعلومات، راجعها قبل الحفظ")}catch(e){toast("فشل الجلب، تأكد من الإنترنت")}},
  a_pick:()=>{readAF();pickImg(u=>{AF.image=u;addForm()})},a_cancel:close,
@@ -872,6 +875,75 @@ function deepStats(){const W=items.filter(i=>i.status==="watched"),U=items.filte
 Object.assign(X,{cm:cmSheet,cm_s:k=>{S.ss=k;cmSheet()},cm_h:k=>{S.mh=+k;cmSheet()},cm_ok:()=>{close();lib()}});
 </script>
 <script>
+/* ── قسم الأمان والتقييم السريع ── */
+/* ── safety net: automatic copy in IndexedDB + backup reminder ── */
+const IDBK={};
+function idbDb(){return new Promise((res,rej)=>{if(IDBK.db)return res(IDBK.db);try{const r=indexedDB.open("wl_safe",1);r.onupgradeneeded=()=>r.result.createObjectStore("s");r.onsuccess=()=>{IDBK.db=r.result;res(r.result)};r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error("blocked"))}catch(e){rej(e)}})}
+const idbTx=(mode,fn)=>idbDb().then(db=>new Promise((res,rej)=>{const tx=db.transaction("s",mode);let q;try{q=fn(tx.objectStore("s"))}catch(e){return rej(e)}tx.oncomplete=()=>res(q&&"result" in q?q.result:q);tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)}));
+const idbGet=k=>idbTx("readonly",s=>s.get(k)),idbPut=(k,v)=>idbTx("readwrite",s=>s.put(v,k)),idbDel=k=>idbTx("readwrite",s=>s.delete(k)),idbKeys=()=>idbTx("readonly",s=>s.getAllKeys());
+let _it=0;
+function idbQueue(){if(SEEDING)return;clearTimeout(_it);_it=setTimeout(()=>idbSnap(),4000)}
+async function idbSnap(tag){try{if(SEEDING||!items||!items.length)return;const rec={ts:Date.now(),n:items.length,d:snapshot()};
+ await idbPut("latest",rec);
+ const dk="d:"+new Date().toISOString().slice(0,10),old=await idbGet(dk);
+ if(!old||rec.n>=old.n*.8)await idbPut(dk,rec);
+ if(tag)await idbPut(tag,rec);
+ const ks=(await idbKeys()).filter(k=>/^d:/.test(k)).sort().reverse();for(const k of ks.slice(7))await idbDel(k);
+ IDBK.err="";localStorage.setItem("wl_idb_last",rec.ts)}catch(e){IDBK.err=String(e&&e.message||e)}}
+function restoreData(d){SEEDING=false;items=d.items;if(d.diary){DIARY=d.diary;put("wl_diary_v1",DIARY)}if(d.guides){GUIDES=d.guides;put("wl_guides_v1",GUIDES)}if(d.order){ORDER=d.order;put("wl_order",ORDER)}if(d.orders){ORDS=d.orders;ordSave()}
+ if(d.customCountries)localStorage.setItem("cc",JSON.stringify(d.customCountries));localStorage.setItem("wl_cc_del",JSON.stringify(d.countryDel||[]));localStorage.setItem("wl_cc_ovr",JSON.stringify(d.countryEdits||{}));ccApply();ccSave();save()}
+async function idbLatest(){try{const l=await idbGet("latest");if(l&&l.n>0)return l;const ks=(await idbKeys()).filter(k=>/^d:/.test(k)).sort().reverse();for(const k of ks){const r=await idbGet(k);if(r&&r.n>0)return r}}catch(e){}return null}
+async function idbBoot(){let r=null;try{r=await Promise.race([idbLatest(),new Promise(s=>setTimeout(()=>s(null),3000))])}catch(e){}
+ if(r){try{const d=JSON.parse(r.d);if(Array.isArray(d.items)&&d.items.length){restoreData(d);render();toast("رجّعت قائمتك ("+d.items.length+" عمل) من النسخة التلقائية");return}}catch(e){}}
+ seedFetch()}
+const idbLab=k=>k==="latest"?"آخر نسخة تلقائية":k==="pre-import"?"قبل آخر استيراد":k==="pre-restore"?"قبل آخر استرجاع":/^d:/.test(k)?"نسخة يوم "+k.slice(2):k;
+const agoT=ts=>{const m=Math.round((Date.now()-ts)/6e4);return m<1?"الحين":m<60?"قبل "+m+" دقيقة":m<1440?"قبل "+Math.round(m/60)+" ساعة":"قبل "+Math.round(m/1440)+" يوم"};
+async function safeSheet(){sheet(`<h2>🛟 النسخ التلقائية</h2><div class="sub" style="padding:10px 0">جاري التحميل...</div>`);
+ const rows=[];try{for(const k of await idbKeys()){const r=await idbGet(k);if(r)rows.push([k,r])}}catch(e){}
+ const ord=k=>k==="latest"?0:/^d:/.test(k)?1:2;rows.sort((a,b)=>ord(a[0])-ord(b[0])||b[1].ts-a[1].ts);
+ const lb=+localStorage.getItem("wl_last_backup")||0;
+ sheet(`<h2>🛟 النسخ التلقائية</h2><div class="sub" style="margin:6px 0 10px;padding:0;line-height:1.7">يحفظ التطبيق نسخة كاملة داخل المتصفح بعد كل تعديل، مع آخر 7 أيام. وتنحفظ نسخة قبل أي استيراد أو استرجاع.</div><div class="lst">${rows.map(([k,r])=>`<div class="li" style="cursor:default"><span>${E(idbLab(k))}<br><small style="color:var(--mu)">${r.n} عمل • ${agoT(r.ts)}</small></span><button class="chip" data-x="sf_rest" data-k="${E(k)}">استرجاع</button></div>`).join("")||`<div class="sub" style="padding:14px 0">ما كو نسخ بعد، تنحفظ بعد أول تعديل</div>`}</div>${IDBK.err?`<div class="sub" style="padding:8px 0;color:var(--gold)">⚠️ تعذّر الحفظ التلقائي: ${E(IDBK.err)}</div>`:""}<div class="sub" style="margin:12px 0 0;padding:0;line-height:1.7">آخر نسخة بملف: ${lb?agoT(lb):"ما صدّرت بعد"}.<br>النسخ التلقائية تحميك من الأخطاء والاستيراد الغلط، بس تنمسح إذا مسحت بيانات الموقع، فخلّ التصدير الدوري بملف.</div><button class="btn" data-x="m_export">📦 تصدير نسخة الآن</button>`)}
+function bkCheck(){try{const now=Date.now();if(!localStorage.getItem("wl_first_seen"))localStorage.setItem("wl_first_seen",now);
+ const last=Math.max(+localStorage.getItem("wl_last_backup")||0,+localStorage.getItem("wl_cloud_last")||0),ref=last||+localStorage.getItem("wl_first_seen")||now,days=Math.floor((now-ref)/864e5);
+ if(days<7||!items.length||now-(+localStorage.getItem("wl_bk_nag")||0)<864e5||document.getElementById("bkbar"))return;
+ const b=document.createElement("div");b.id="bkbar";b.innerHTML=`<span>${last?"مرّ "+days+" يوم على آخر نسخة احتياطية":"ما صدّرت نسخة احتياطية بملف بعد"}</span><button data-x="bk_now">صدّر الآن</button><button data-x="bk_later">لاحقاً</button>`;document.body.appendChild(b)}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){clearTimeout(_it);idbSnap()}});
+setTimeout(()=>idbSnap(),6000);setTimeout(bkCheck,5000);
+
+/* ── quick rating + watch dates ── */
+const QR={q:[],i:0,tot:0,done:0,r:0,d:null,h:[]};
+const qrList=()=>items.filter(i=>i.status==="watched"&&!i.qs&&(!i.myRating||!i.watchedAt)).sort((a,b)=>((!a.myRating&&!a.watchedAt)?0:1)-((!b.myRating&&!b.watchedAt)?0:1));
+const QRM=[["هالشهر",0],["الشهر الماضي",1],["قبل 3 شهور",3],["قبل 6 شهور",6],["قبل سنة",12],["قبل سنتين",24]];
+const qrDate=n=>{if(n===0)return Date.now();const d=new Date();d.setMonth(d.getMonth()-n,15);d.setHours(12,0,0,0);return d.getTime()};
+const fmtMo=ts=>new Date(ts).toLocaleDateString("ar-IQ",{month:"long",year:"numeric"});
+function qrStart(){QR.q=qrList().map(i=>i.id);QR.tot=QR.q.length;QR.i=0;QR.done=0;QR.h=[];if(!QR.tot)return toast("كل أعمالك المشاهَدة عندها تقييم وتاريخ 👌");qrCard()}
+function qrCard(){const id=QR.q[QR.i];if(id===undefined)return qrEnd();const m=items.find(x=>x.id==id);if(!m){QR.i++;return qrCard()}
+ QR.r=m.myRating||0;QR.d=m.watchedAt||null;const mx=new Date().toISOString().slice(0,7);
+ sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><h2>⭐ تقييم سريع</h2><span class="cm">${QR.i+1} من ${QR.tot}</span></div><div class="bar" style="margin:8px 0 14px"><i style="width:${Math.round(QR.i/QR.tot*100)}%"></i></div>
+ <div style="display:flex;gap:14px;align-items:flex-start"><div class="poster" style="width:96px;flex:none">${m.image?`<img src="${E(m.image)}" alt="" loading="lazy">`:E(m.name)}</div><div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:700;line-height:1.5">${E(m.name)}</div><div class="cm">${m.year||""}${m.year?" • ":""}${TL[m.type]||""}${m.imdb?" • IMDb "+m.imdb:""}</div>
+ <div class="lbl" style="margin-top:12px">تقييمك</div><div id="qr_stars" dir="ltr" style="position:relative;display:inline-block;font-size:34px;line-height:1.2;letter-spacing:3px;touch-action:none;user-select:none"><span style="color:var(--ln)">★★★★★</span><span id="qr_fill" style="position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:var(--gold);width:${QR.r/5*100}%">★★★★★</span></div><div class="cm" id="qr_val">${QR.r?QR.r+" ★":"بدون تقييم — اسحب أو اضغط على النجوم"}</div></div></div>
+ <div class="lbl" style="margin-top:14px">متى شفته تقريباً؟${m.watchedAt?` <span class="cm">(الحالي: ${fmtMo(m.watchedAt)})</span>`:""}</div><div class="qrd" id="qr_d">${QRM.map(([l,n])=>`<button class="chip" data-x="qr_d" data-k="${n}">${l}</button>`).join("")}</div>
+ <input class="in" type="month" id="qr_m" max="${mx}" style="margin-top:8px" aria-label="اختيار شهر">
+ <button class="btn" data-x="qr_save" style="margin-top:14px">حفظ والتالي</button>
+ <div class="qrb"><button class="chip" data-x="qr_skip">تخطي</button><button class="chip" data-x="qr_forget">ما أتذكر</button><button class="chip" data-x="qr_undo">↩ السابق</button><button class="chip" data-x="qr_end">إنهاء</button></div>`);
+ const el=$("#qr_stars"),set=v=>{QR.r=v;$("#qr_fill").style.width=v/5*100+"%";$("#qr_val").textContent=v?v+" ★":"بدون تقييم"},
+  fe=e=>{const b=el.getBoundingClientRect();return Math.max(.5,Math.min(5,Math.ceil((e.clientX-b.left)/b.width*10)/2))};
+ el.addEventListener("pointerdown",e=>{try{el.setPointerCapture(e.pointerId)}catch(x){}set(fe(e))});el.addEventListener("pointermove",e=>{if(e.buttons)set(fe(e))});
+ $("#qr_m").onchange=e=>{const v=e.target.value;if(!v)return;const[y,mo]=v.split("-").map(Number);QR.d=new Date(y,mo-1,15,12).getTime();document.querySelectorAll("#qr_d .chip").forEach(c=>c.classList.remove("on"))}}
+function qrEnd(){const ra=items.filter(i=>i.myRating>0),avg=ra.length?(ra.reduce((a,i)=>a+i.myRating,0)/ra.length).toFixed(1):"—",left=qrList().length,hid=items.filter(i=>i.status==="watched"&&i.qs).length;
+ sheet(`<h2>🎉 خلصت الدفعة</h2><div class="stats" style="margin:14px 0 0"><div class="nums"><div><b>${QR.done}</b><span>حدّثتهم</span></div><div><b>${ra.length}</b><span>مقيَّم</span></div><div><b>${avg}</b><span>معدل تقييمك</span></div></div></div><div class="sub" style="padding:12px 0 0">${left?"باقي "+left+" بدون تقييم أو تاريخ":"كل أعمالك المشاهَدة مكتملة 👌"}</div>${hid?`<button class="btn" data-x="qr_reset" style="background:var(--s2);color:var(--tx)">إرجاع الأعمال اللي استبعدتها (${hid})</button>`:""}${left?`<button class="btn" data-x="m_qr">كمّل</button>`:""}<button class="btn" data-x="qr_close" style="background:var(--s2);color:var(--tx)">إغلاق</button>`)}
+Object.assign(X,{m_qr:qrStart,m_safe:safeSheet,
+ qr_d:k=>{QR.d=qrDate(+k);document.querySelectorAll("#qr_d .chip").forEach(c=>c.classList.toggle("on",c.dataset.k===String(k)));const m=$("#qr_m");if(m)m.value=""},
+ qr_save:()=>{const m=items.find(x=>x.id==QR.q[QR.i]);if(!m)return;const nr=QR.r>0&&QR.r!==m.myRating,nd=QR.d&&QR.d!==m.watchedAt;if(!nr&&!nd)return toast("اختر تقييم أو تاريخ، أو اضغط تخطي");QR.h.push({i:QR.i,id:m.id,r:m.myRating,d:m.watchedAt,qs:m.qs,done:1});if(nr)m.myRating=QR.r;if(nd)m.watchedAt=QR.d;save();QR.done++;QR.i++;qrCard()},
+ qr_skip:()=>{QR.i++;qrCard()},
+ qr_forget:()=>{const m=items.find(x=>x.id==QR.q[QR.i]);if(m){QR.h.push({i:QR.i,id:m.id,r:m.myRating,d:m.watchedAt,qs:m.qs,done:0});m.qs=1;save()}QR.i++;qrCard()},
+ qr_undo:()=>{const h=QR.h.pop();if(!h)return toast("ما كو شي للتراجع");const m=items.find(x=>x.id==h.id);if(m){m.myRating=h.r;m.watchedAt=h.d;if(h.qs)m.qs=h.qs;else delete m.qs;save()}QR.done-=h.done;QR.i=h.i;qrCard()},
+ qr_end:()=>{QR.i=QR.q.length;qrEnd();refresh()},qr_close:()=>{close();refresh()},
+ qr_reset:()=>{items.forEach(i=>{if(i.qs)delete i.qs});save();refresh();qrStart()},
+ sf_rest:async k=>{const r=await idbGet(k);if(!r)return;if(!confirm("استرجاع «"+idbLab(k)+"» ("+r.n+" عمل)؟\nقائمتك الحالية تنحفظ قبلها كنسخة «قبل آخر استرجاع»"))return;await idbSnap("pre-restore");restoreData(JSON.parse(r.d));close();render();toast("تم الاسترجاع ("+items.length+" عمل)")},
+ bk_now:()=>exportData(),bk_later:()=>{localStorage.setItem("wl_bk_nag",Date.now());const b=document.getElementById("bkbar");b&&b.remove()}});
+</script>
+<script>
 /* ── قسم 32 ── */
 /* IMDb-id identity: MDBList ratings + IMDb search merged with TMDB */
 let WEBI=[];
@@ -882,7 +954,8 @@ function imdbGroup(il){return il&&il.length?`<div class="lbl">من IMDb (اضغ�
 Object.assign(X,{web_imdb:async k=>{const x=WEBI[+k];if(!x)return;toast("جاري الربط...");try{const f=await tm("/find/"+x.imdbID+"?external_source=imdb_id&language=ar"),r=(f.movie_results||[])[0]?{...f.movie_results[0],media_type:"movie"}:(f.tv_results||[])[0]?{...f.tv_results[0],media_type:"tv"}:null;addForm(true);if(r)await tmFill(r,r.media_type);else{AF.name=x.Title;AF.year=+String(x.Year).slice(0,4)||null;AF.type=x.Type==="series"?"series":"movie";AF.image=x.Poster&&x.Poster!=="N/A"?x.Poster:"";addForm()}}catch(e){toast("فشل: "+e.message)}}});
 document.addEventListener("click",e=>{const t=e.target.closest("[data-x]");if(t&&X[t.dataset.x])X[t.dataset.x](t.dataset.k)});
 document.addEventListener("input",e=>{if(e.target.id==="d_q")dOpts(e.target.value)});
-if(SEEDING)fetch("seed.json").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{const a=Array.isArray(d)?d:d.items||[];a.forEach(i=>{delete i.chk;if(i.country==="kr")i.country="ko"});if(d.customCountries)localStorage.setItem("cc",JSON.stringify(d.customCountries));ccApply();items=a;SEEDING=false;save();render()}).catch(e=>{SEEDING=false;items=[];toast("ما قدرت أحمّل seed.json ("+e.message+")");render()});
+function seedFetch(){fetch("seed.json").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{const a=Array.isArray(d)?d:d.items||[];a.forEach(i=>{delete i.chk;if(i.country==="kr")i.country="ko"});if(d.customCountries)localStorage.setItem("cc",JSON.stringify(d.customCountries));ccApply();items=a;SEEDING=false;save();render()}).catch(e=>{SEEDING=false;items=[];toast("ما قدرت أحمّل seed.json ("+e.message+")");render()});}
+if(SEEDING)idbBoot();
 render();setTimeout(()=>{if(!srv())toast("فعّل السيرفر من المزيد ← السيرفر والمزامنة");else{const l=+localStorage.getItem("wl_srv_chk")||0;if(Date.now()-l>1800000){localStorage.setItem("wl_srv_chk",Date.now());srvFetch("/tmdb/configuration").catch(()=>{})}}},1500);if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 </script></body></html>
