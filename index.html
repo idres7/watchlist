@@ -127,6 +127,8 @@ nav button{position:relative;z-index:1;padding:8px 0 6px!important;border-radius
 nav .ind{position:absolute;top:6px;bottom:6px;left:0;width:0;border-radius:22px;background:rgba(124,156,255,.17);transition:transform .38s cubic-bezier(.3,1.25,.4,1),width .3s;z-index:0;pointer-events:none}nav .ind.nt{transition:none}
 #app{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}.toast,.undo{bottom:114px!important}#bkbar{bottom:calc(102px + env(safe-area-inset-bottom))!important}
 @media (prefers-reduced-motion:reduce){nav .ind{transition:none}}
+#stbar{position:fixed;top:calc(8px + env(safe-area-inset-top));inset-inline:10px;max-width:500px;margin:0 auto;background:#3a1d1d;border:1px solid #ff7a7a;color:var(--tx);padding:10px 14px;border-radius:12px;font-size:12.5px;line-height:1.7;z-index:41}
+body:has(#stbar) #srvbar{top:calc(112px + env(safe-area-inset-top))}
 </style></head><body>
 <div id="app"></div>
 <nav id="nav"></nav><div class="veil" id="veil"></div><div class="sheet" id="sheet"></div><div class="toast" id="toast"></div>
@@ -149,7 +151,7 @@ function ccApply(){let cu=[];try{cu=JSON.parse(localStorage.getItem("cc")||"[]")
  COUNTRIES.length=0;out.forEach(c=>COUNTRIES.push(c))}
 ccApply();
 try{if(!localStorage.getItem("wl_chk0")){items.forEach(i=>{delete i.chk});localStorage.setItem("wl_chk0","1")}}catch(e){}
-const save=()=>{if(SEEDING)return;try{localStorage.setItem(SK,JSON.stringify(items))}catch(e){}scheduleCloudPush();typeof idbQueue==="function"&&idbQueue()};save();
+const save=()=>{if(SEEDING)return;try{localStorage.setItem(SK,JSON.stringify(items))}catch(e){if(!window.__sf){window.__sf=1;typeof toast==="function"&&toast("⚠️ تعذّر حفظ التغييرات بالمتصفح، صدّر نسخة احتياطية")}}scheduleCloudPush();typeof idbQueue==="function"&&idbQueue()};save();
 const flag=c=>(COUNTRIES.find(x=>x.code===c)||{flag:"🌍"}).flag;
 const E=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const $=s=>document.querySelector(s);
@@ -721,7 +723,7 @@ async function vput(m){const d=await vdb();return new Promise((res,rej)=>{const 
 const unit=v=>{let n=0;for(const x of v)n+=x*x;n=Math.sqrt(n)||1;return Float32Array.from(v,x=>x/n)};
 const dot=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s};
 async function aiPost(p,b){const r=await srvFetch(p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});if(r.status===501)throw new Error("فعّل Workers AI بالـWorker (Bindings ← Workers AI باسم AI)");if(!r.ok)throw new Error("("+r.status+") حدّث كود الـWorker أول");return r.json()}
-async function vecJob(){if(VJ)return;if(!srv())return toast("فعّل السيرفر أول");VJ=true;let have={};try{have=await vget()}catch(e){VJ=false;return toast("المتصفح ما يدعم التخزين المحلي الكبير")}
+async function vecJob(){if(VJ)return;if(!srv())return toast("فعّل السيرفر أول");VJ=true;let have={};try{have=await vget()}catch(e){VJ=false;return toast(/^(content|file):$/.test(location.protocol)?"الفهرسة ما تشتغل من ملف محلي، افتح التطبيق من رابط GitHub Pages":"المتصفح ما يدعم التخزين المحلي الكبير")}
  const todo=items.filter(i=>i.tm&&!have[i.id]);if(!todo.length){VJ=false;return toast("كل الأعمال مفهرسة")}
  sheet(`<h2>🧠 فهرسة ذكية</h2><div class="sub" id="vjp">0/${todo.length}</div>`);let n=0,er=0;const buf=[],tot=todo.length;
  const flush=async()=>{if(!buf.length)return;const part=buf.splice(0,buf.length);try{const r=await aiPost("/ai/embed",{texts:part.map(x=>x.t)}),m={};part.forEach((x,k)=>{m[x.id]={v:unit(r.v[k]),ov:x.ov}});await vput(m);n+=part.length}catch(e){if(++er===1)toast("فشل: "+e.message)}const p=$("#vjp");if(p)p.textContent=n+"/"+tot};
@@ -944,7 +946,7 @@ async function safeSheet(){sheet(`<h2>🛟 النسخ التلقائية</h2><di
  const rows=[];try{for(const k of await idbKeys()){const r=await idbGet(k);if(r)rows.push([k,r])}}catch(e){}
  const ord=k=>k==="latest"?0:/^d:/.test(k)?1:2;rows.sort((a,b)=>ord(a[0])-ord(b[0])||b[1].ts-a[1].ts);
  const lb=+localStorage.getItem("wl_last_backup")||0;
- sheet(`<h2>🛟 النسخ التلقائية</h2><div class="sub" style="margin:6px 0 10px;padding:0;line-height:1.7">يحفظ التطبيق نسخة كاملة داخل المتصفح بعد كل تعديل، مع آخر 7 أيام. وتنحفظ نسخة قبل أي استيراد أو استرجاع.</div><div class="lst">${rows.map(([k,r])=>`<div class="li" style="cursor:default"><span>${E(idbLab(k))}<br><small style="color:var(--mu)">${r.n} عمل • ${agoT(r.ts)}</small></span><button class="chip" data-x="sf_rest" data-k="${E(k)}">استرجاع</button></div>`).join("")||`<div class="sub" style="padding:14px 0">ما كو نسخ بعد، تنحفظ بعد أول تعديل</div>`}</div>${IDBK.err?`<div class="sub" style="padding:8px 0;color:var(--gold)">⚠️ تعذّر الحفظ التلقائي: ${E(IDBK.err)}</div>`:""}<div class="sub" style="margin:12px 0 0;padding:0;line-height:1.7">آخر نسخة بملف: ${lb?agoT(lb):"ما صدّرت بعد"}.<br>النسخ التلقائية تحميك من الأخطاء والاستيراد الغلط، بس تنمسح إذا مسحت بيانات الموقع، فخلّ التصدير الدوري بملف.</div><button class="btn" data-x="m_export">📦 تصدير نسخة الآن</button>`)}
+ sheet(`<h2>🛟 النسخ التلقائية</h2><div class="sub" style="margin:6px 0 10px;padding:0;line-height:1.7">يحفظ التطبيق نسخة كاملة داخل المتصفح بعد كل تعديل، مع آخر 7 أيام. وتنحفظ نسخة قبل أي استيراد أو استرجاع.</div><div class="sub" style="padding:0 0 8px;color:var(--mu);direction:ltr;text-align:right">${E(location.protocol)} • localStorage ${STO.ls?"✓":"✗"} • IndexedDB ${STO.idb?"✓":"✗"}</div><div class="lst">${rows.map(([k,r])=>`<div class="li" style="cursor:default"><span>${E(idbLab(k))}<br><small style="color:var(--mu)">${r.n} عمل • ${agoT(r.ts)}</small></span><button class="chip" data-x="sf_rest" data-k="${E(k)}">استرجاع</button></div>`).join("")||`<div class="sub" style="padding:14px 0">ما كو نسخ بعد، تنحفظ بعد أول تعديل</div>`}</div>${IDBK.err?`<div class="sub" style="padding:8px 0;color:var(--gold)">⚠️ تعذّر الحفظ التلقائي: ${E(IDBK.err)}</div>`:""}<div class="sub" style="margin:12px 0 0;padding:0;line-height:1.7">آخر نسخة بملف: ${lb?agoT(lb):"ما صدّرت بعد"}.<br>النسخ التلقائية تحميك من الأخطاء والاستيراد الغلط، بس تنمسح إذا مسحت بيانات الموقع، فخلّ التصدير الدوري بملف.</div><button class="btn" data-x="m_export">📦 تصدير نسخة الآن</button>`)}
 function bkCheck(){try{const now=Date.now();if(!localStorage.getItem("wl_first_seen"))localStorage.setItem("wl_first_seen",now);
  const last=Math.max(+localStorage.getItem("wl_last_backup")||0,+localStorage.getItem("wl_cloud_last")||0),ref=last||+localStorage.getItem("wl_first_seen")||now,days=Math.floor((now-ref)/864e5);
  if(days<7||!items.length||now-(+localStorage.getItem("wl_bk_nag")||0)<864e5||document.getElementById("bkbar"))return;
@@ -990,7 +992,7 @@ Object.assign(X,{m_qr:qrStart,m_safe:safeSheet,
 /* ── More tab sections ── */
 const SECS=[["بياناتي",["m_cloud","m_safe","m_export","m_import","m_trash","m_country"]],["مشاهدتي",["m_qr","m_smart","m_stats","m_ords","m_notif"]],["أدوات الصيانة",["m_genres","m_cv","m_vf","m_chk","m_bulk","m_vec","m_err"]],["المظهر",["m_theme","m_home"]]];
 function moreGroup(){if(MEDIT)return;const l=document.querySelector("#app .lst");if(!l)return;const bs=[...l.querySelectorAll("button.li")],used=new Set(),out=document.createElement("div");
- const sec=(n,mem,ix)=>{const d=document.createElement("div");d.className="msec s"+ix;d.innerHTML=`<div class="mh">${n}</div><div class="lst"></div>`;const L=d.lastChild;mem.forEach(b=>{used.add(b);const sp=b.firstElementChild,m=sp&&sp.textContent.match(/^(\S+)\s+([\s\S]*)$/);if(m)sp.innerHTML=`<i class="mi">${MIC[b.dataset.x]?`<svg viewBox="0 0 24 24">${MIC[b.dataset.x]}</svg>`:m[1]}</i><span>${m[2]}</span>`;L.append(b)});out.append(d)};
+ const sec=(n,mem,ix)=>{const d=document.createElement("div");d.className="msec s"+ix;d.innerHTML=`<div class="mh">${n}</div><div class="lst"></div>`;const L=d.lastChild;mem.forEach(b=>{used.add(b);const sp=b.firstElementChild,m=sp&&sp.textContent.match(/^(\S+)\s+([\s\S]*)$/);if(m)sp.innerHTML=`<i class="mi">${m[1]}</i><span>${m[2]}</span>`;L.append(b)});out.append(d)};
  SECS.forEach(([n,keys],ix)=>{const mem=bs.filter(b=>keys.includes(b.dataset.x));if(mem.length)sec(n,mem,ix+1)});
  const rest=bs.filter(b=>!used.has(b));if(rest.length)sec("أخرى",rest,1);l.replaceWith(out)}
 function more(){more0();moreGroup()}
@@ -1032,6 +1034,18 @@ function navInd(){const n=$("#nav");if(!n)return;let i=n.querySelector(".ind");c
  const on=n.querySelector("button.on");if(!on){i.style.width="0";return}
  i.style.width=on.offsetWidth+"px";i.style.transform=`translateX(${on.offsetLeft}px)`;if(fresh)requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.remove("nt")))}
 addEventListener("resize",()=>{const i=document.querySelector("#nav .ind");if(i){i.classList.add("nt");navInd();requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.remove("nt")))}});
+</script>
+<script>
+/* ── قسم E ── */
+/* ── storage probe: warn when the page can't store data ── */
+const STO={ls:true,idb:true,proto:location.protocol};
+function stoNote(){const loc=/^(content|file):$/.test(STO.proto);if((!loc&&STO.ls&&STO.idb)||document.getElementById("stbar"))return;
+ const m=loc?"⚠️ فاتح التطبيق من ملف محلي ("+STO.proto+"//). التخزين والفهرسة الذكية والنسخ التلقائية ما تشتغل بهالطريقة وتعديلاتك ممكن ما تنحفظ. افتحه من رابط GitHub Pages.":!STO.ls?"⚠️ المتصفح يمنع حفظ البيانات (وضع خاص؟). تعديلاتك ما راح تنحفظ.":"⚠️ IndexedDB غير متاح: الفهرسة الذكية والنسخ التلقائية متوقفة.";
+ const b=document.createElement("div");b.id="stbar";b.textContent=m;b.onclick=()=>b.remove();document.body.appendChild(b)}
+function stoProbe(){try{localStorage.setItem("__p","1");if(localStorage.getItem("__p")!=="1")STO.ls=false;localStorage.removeItem("__p")}catch(e){STO.ls=false}
+ try{const r=indexedDB.open("wl_probe",1);r.onerror=()=>{STO.idb=false;stoNote()};r.onsuccess=()=>{try{r.result.close()}catch(e){}}}catch(e){STO.idb=false}
+ setTimeout(stoNote,400)}
+setTimeout(stoProbe,1200);
 </script>
 <script>
 /* ── قسم 32 ── */
