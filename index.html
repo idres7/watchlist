@@ -119,6 +119,14 @@ html,body{overflow-x:clip}#app{width:100%;overflow-x:clip}
 .card,.chip,.btn,.hb button,nav button,.cbtn{transition:transform .14s,background .2s,opacity .2s}
 .card:active{transform:scale(.96)}.chip:active,.btn:active,.hb button:active,.cbtn:active{transform:scale(.96);opacity:.9}.lst .li:active{background:rgba(255,255,255,.04)}nav button:active{transform:scale(.92)}
 @media (prefers-reduced-motion:reduce){#app.tin,.veil.on{animation:none}.sheet{transition:none!important}.card,.chip,.btn{transition:none}}
+.stk{position:relative;aspect-ratio:2/3;margin-top:12px}.stk .poster{position:absolute;inset:0;aspect-ratio:auto}
+.stk .s1{z-index:2;box-shadow:0 8px 18px rgba(0,0,0,.55)}.stk .s2{z-index:1;transform:translate(13px,-9px) rotate(6deg) scale(.95);filter:brightness(.62)}.stk .s3{z-index:0;transform:translate(-13px,-9px) rotate(-6deg) scale(.95);filter:brightness(.46)}
+.stk .poster::after{display:none}.stk .s1::after{display:block}
+nav{bottom:calc(12px + env(safe-area-inset-bottom))!important;left:12px!important;right:12px!important;width:auto!important;max-width:496px;margin:0 auto!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:30px;background:rgba(26,28,35,.66)!important;backdrop-filter:blur(24px) saturate(1.7)!important;-webkit-backdrop-filter:blur(24px) saturate(1.7)!important;box-shadow:0 12px 34px rgba(0,0,0,.5);padding:6px!important}
+nav button{position:relative;z-index:1;padding:8px 0 6px!important;border-radius:22px}nav .on{color:var(--tx)}nav .on svg{stroke:var(--ac)}
+nav .ind{position:absolute;top:6px;bottom:6px;left:0;width:0;border-radius:22px;background:rgba(124,156,255,.17);transition:transform .38s cubic-bezier(.3,1.25,.4,1),width .3s;z-index:0;pointer-events:none}nav .ind.nt{transition:none}
+#app{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}.toast,.undo{bottom:114px!important}#bkbar{bottom:calc(102px + env(safe-area-inset-bottom))!important}
+@media (prefers-reduced-motion:reduce){nav .ind{transition:none}}
 </style></head><body>
 <div id="app"></div>
 <nav id="nav"></nav><div class="veil" id="veil"></div><div class="sheet" id="sheet"></div><div class="toast" id="toast"></div>
@@ -147,7 +155,7 @@ const E=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt
 const $=s=>document.querySelector(s);
 let S={tab:"home",q:"",c:"",g:"",ss:"",mh:0,type:"all",st:"all",sort:"new",lim:60};
 const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>',series:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',more:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',lib:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',add:'<path d="M12 5v14M5 12h14"/>',rnd:'<path d="M4 4l5 5M20 4l-6 6M4 20l16-16M15 15l5 5M4 15l5-5"/>'};
-function nav(){const b=(k,l)=>`<button class="${S.tab===k?"on":""}" data-go="${k}"><svg viewBox="0 0 24 24">${IC[k]}</svg>${l}</button>`;$("#nav").innerHTML=b("home","الرئيسية")+b("lib","المكتبة")+`<button class="fab" data-act="add" aria-label="إضافة"><svg viewBox="0 0 24 24">${IC.add}</svg></button>`+b("series","السلاسل")+b("more","المزيد")}
+function nav(){if(window.NAVBUILT&&document.querySelector("#nav .ind")){document.querySelectorAll("#nav button[data-go]").forEach(x=>x.classList.toggle("on",x.dataset.go===S.tab));navInd();return}const b=(k,l)=>`<button class="${S.tab===k?"on":""}" data-go="${k}"><svg viewBox="0 0 24 24">${IC[k]}</svg>${l}</button>`;$("#nav").innerHTML=b("home","الرئيسية")+b("lib","المكتبة")+`<button class="fab" data-act="add" aria-label="إضافة"><svg viewBox="0 0 24 24">${IC.add}</svg></button>`+b("series","السلاسل")+b("more","المزيد");window.NAVBUILT=1;navInd()}
 function card(i){const m=[i.year,TL[i.type]].filter(Boolean).join(" • ");
  return`<button class="card" data-id="${i.id}"><div class="poster">${E(i.name)}${i.image?`<img loading="lazy" src="${E(i.image)}" onerror="this.remove()" alt="">`:""}${i.imdb?`<span class="pill">★ ${i.imdb}</span>`:""}${i.myRating?`<span class="rt">${i.myRating} ★</span>`:""}<span class="bd" style="background:${SC[i.status]}">${{watched:"✓",watching:"▶",dropped:"⏸"}[i.status]||""}</span></div><div class="ct">${E(i.name)}</div><div class="cm">${flag(i.country)} ${m}</div></button>`}
 function sec(t,list,go){if(!list.length)return"";return`<div class="sec"><div class="hd"><h2>${t}</h2>${go?`<button data-go="lib" data-st="${go}">عرض الكل</button>`:""}</div><div class="row">${list.map(card).join("")}</div></div>`}
@@ -355,8 +363,9 @@ let GK=null;
 function franchiseBase(n){for(const [r,k] of FO)if(r.test(n))return k;return n.split(/[:–]/)[0].replace(/\s*\((S\d+|Season\s*\d+)\)\s*$/i,"").replace(/\s+(Part\s+(One|Two|Three|Four|\d+)|Chapter\s+\d+|[IVX]{1,4}|\d+)\s*$/i,"").trim()}
 const fkey=i=>i.fr==="-"?null:(i.fr||(i.col&&i.col.name.replace(/\s*[-–]?\s*(Collection|Saga|Trilogy)\s*$/i,"").trim())||franchiseBase(i.name));
 function groupMap(){const m=new Map();items.forEach(i=>{const k=fkey(i);if(!k)return;const l=k.toLowerCase();(m.get(l)||m.set(l,{key:k,members:[]}).get(l)).members.push(i)});[...m].forEach(([l,g])=>{if(g.members.length<2)m.delete(l)});m.forEach(g=>g.members.sort((a,b)=>(a.year||0)-(b.year||0)));return m}
-function gcard(g){const n=g.members.length,w=g.members.filter(m=>m.status==="watched").length,i=g.members.find(m=>m.image)||g.members[0];return`<button class="card" data-x="grp_open" data-k="${E(g.key)}"><div class="poster">${E(g.key)}${i.image?`<img loading="lazy" src="${E(i.image)}" onerror="this.remove()" alt="">`:""}<span class="pill" style="color:var(--tx)">${w}/${n}</span><i class="gp" style="width:${Math.round(w/n*100)}%"></i></div><div class="ct">${E(g.key)}</div><div class="cm">${w===n?"مكتملة ✓":"سلسلة • "+n+" أعمال"}</div></button>`}
-const SI={watched:"✅",watching:"▶️",unwatched:"⏳",dropped:"⏸️"};
+function gcard(g){const n=g.members.length,w=g.members.filter(m=>m.status==="watched").length,ims=g.members.filter(m=>m.image).map(m=>m.image),front=ims[0],b1=ims[1]||front,b2=ims[2]||b1;
+ const im=u=>u?`<img loading="lazy" src="${E(u)}" onerror="this.remove()" alt="">`:"";
+ return`<button class="card" data-x="grp_open" data-k="${E(g.key)}"><div class="stk">${n>=3?`<div class="poster s3">${im(b2)}</div>`:""}${n>=2?`<div class="poster s2">${im(b1)}</div>`:""}<div class="poster s1">${E(g.key)}${im(front)}<span class="pill" style="color:var(--tx)">${w}/${n}</span><i class="gp" style="width:${Math.round(w/n*100)}%"></i></div></div><div class="ct">${E(g.key)}</div><div class="cm">${w===n?"مكتملة ✓":"سلسلة • "+n+" أعمال"}</div></button>`} const SI={watched:"✅",watching:"▶️",unwatched:"⏳",dropped:"⏸️"};
 function grpSheet(){const g=groupMap().get((GK||"").toLowerCase());if(!g)return close();const n=g.members.length,w=g.members.filter(m=>m.status==="watched").length,nx=g.members.find(m=>m.status!=="watched");
  sheet(`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>${E(g.key)}</h2><button data-x="gx_edit" aria-label="تعديل السلسلة" style="font-size:20px;padding:6px 8px">✏️</button></div><div class="sub" style="padding:2px 0 8px">شاهدت ${w} من ${n}</div><div class="bar" style="margin:0 0 12px"><i style="width:${Math.round(w/n*100)}%"></i></div>${nx?`<button class="btn" data-x="g_open" data-k="${nx.id}" style="margin:0 0 8px">▶ التالي: ${E(nx.name)}</button>`:""}
  ${g.members.map(m=>`<div class="gr"><button class="card" data-id="${m.id}" style="display:flex;gap:10px;align-items:center;flex:1;min-width:0"><div class="poster" style="width:40px;flex:none;border-radius:6px;padding:0">${m.image?`<img loading="lazy" src="${E(m.image)}" onerror="this.remove()" alt="">`:""}</div><span style="flex:1;min-width:0"><b class="ct" style="display:block;font-size:14px">${E(m.name)}</b><span class="cm">${m.year||""} • ${TL[m.type]}</span></span></button><button data-x="g_st" data-k="${m.id}" style="font-size:20px;padding:8px" aria-label="تغيير الحالة">${SI[m.status]}</button></div>`).join("")}
@@ -1015,6 +1024,14 @@ function heroSec(){let i=items.find(x=>x.status==="watching"),lab="▶ أكمل 
  return `<div class="hero">${i.image?`<div class="hbg" style="background-image:url(${E(i.image)})"></div>`:""}<div class="hin"><div class="poster hp">${E(i.name)}${i.image?`<img loading="lazy" src="${E(i.image)}" onerror="this.remove()" alt="">`:""}</div><div class="ht"><span class="hl">${lab}</span><b>${E(i.name)}</b><span class="hm">${E(m)}</span><div class="hb"><button data-x="hero_open" data-k="${i.id}">التفاصيل</button><button data-x="hero_act" data-k="${i.id}">${act}</button></div></div></div></div>`}
 function countUp(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;document.querySelectorAll("#app .nums b").forEach(b=>{const v=+b.textContent;if(!v||v>5000)return;const t0=performance.now(),f=n=>{const p=Math.min(1,(n-t0)/650);b.textContent=Math.round(v*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f);else b.textContent=v};b.textContent=0;requestAnimationFrame(f)})}
 Object.assign(X,{hero_open:k=>detail(k),hero_act:k=>{const i=items.find(x=>x.id==k);if(!i)return;if(i.status==="watching"){snap("تم تعليمه كمشاهَد");i.status="watched";if(!i.watchedAt)i.watchedAt=Date.now()}else{snap("بدأت المشاهدة");i.status="watching"}save();render()}});
+</script>
+<script>
+/* ── قسم D ── */
+/* ── batch D: sliding nav indicator ── */
+function navInd(){const n=$("#nav");if(!n)return;let i=n.querySelector(".ind");const fresh=!i;if(!i){i=document.createElement("i");i.className="ind nt";n.prepend(i)}
+ const on=n.querySelector("button.on");if(!on){i.style.width="0";return}
+ i.style.width=on.offsetWidth+"px";i.style.transform=`translateX(${on.offsetLeft}px)`;if(fresh)requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.remove("nt")))}
+addEventListener("resize",()=>{const i=document.querySelector("#nav .ind");if(i){i.classList.add("nt");navInd();requestAnimationFrame(()=>requestAnimationFrame(()=>i.classList.remove("nt")))}});
 </script>
 <script>
 /* ── قسم 32 ── */
