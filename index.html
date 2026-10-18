@@ -137,6 +137,11 @@ html.light .hero,html.light .hero .ht b,html.light .hb button+button{color:#fff}
 html.light #stbar{background:#ffe5e5}html.light #bkbar{box-shadow:0 6px 20px rgba(0,0,0,.15)}
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:8px}
 html.light p[style*="6ee7b7"]{color:#0f7a55!important}html.light p[style*="93c5fd"]{color:#2a5db0!important}
+/* app feel: no pull-to-refresh, no zoom, no tap flash, no accidental selection */
+html,body{overscroll-behavior:none;touch-action:pan-x pan-y;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+nav,button,.card,.chip,.li,.hero,.pill,.bd,h1,h2,h3,.sub,.cm{-webkit-user-select:none;user-select:none}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
+img{-webkit-user-drag:none;-webkit-touch-callout:none}
 </style></head><body>
 <div id="app"></div>
 <nav id="nav"></nav><div class="veil" id="veil"></div><div class="sheet" id="sheet"></div><div class="toast" id="toast"></div>
@@ -567,7 +572,7 @@ Object.assign(X,{ro_top:k=>{const b=$("#rb"),r=b&&b.querySelector(`.rw[data-id="
 <script>
 /* ── قسم 15 ── */
 /* batch: search, stars, list view, genres, move, update, series */
-const VER="2026.10.18";
+const VER="2026.10.19";
 function sn(s){return(s||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f\u064b-\u065f\u0670\u0640]/g,"").replace(/ة/g,"ه").replace(/ى/g,"ي")}
 function stars(r){return"★".repeat(Math.floor(r))+(r%1?"½":"")}
 S.view=localStorage.getItem("wl_view")||"grid";
